@@ -30,7 +30,6 @@ export default class LumCard extends Entity {
         this.width = width;
         this.height = height;
 
-        this.draw();
         // this.text = text;
     }
 
@@ -46,11 +45,6 @@ export default class LumCard extends Entity {
         this.line = line;
 
         this.setupDragHandler();
-    }
-
-    public updateContent() {
-
-        this.notifyChanges();
     }
 
     public remove() {
@@ -107,14 +101,16 @@ export default class LumCard extends Entity {
     private setupDragHandler(): void {
         const dragHandler = d3.drag<SVGGElement, unknown, void>()
             .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.emitDragStart(new EntityEventPayload(event, this));
-                this.emitFocus(new EntityEventPayload(event, this));
+                this.highlightBorders(true);
+                this.emitStartMove(new EntityEventPayload(event, this));
             })
             .on('drag', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.emitDragging(new EntityEventPayload(event, this));
+                this.emitMoving(new EntityEventPayload(event, this));
             })
             .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.emitDragEnd(new EntityEventPayload(event, this));
+                this.highlightBorders(false);
+                this.emitStopMove(new EntityEventPayload(event, this));
+                this.emitFocus(new EntityEventPayload(event, this));
             });
 
         this.localGroup

@@ -1,4 +1,5 @@
 import { EventBus } from "../EventBus";
+import Event from "../EventNames";
 import EventPayload from "../interfaces/EventPayload";
 import ControllerBase from "./ControllerBase";
 
@@ -10,22 +11,18 @@ export default class MovingController extends ControllerBase {
     }
 
     protected listenToEvents(): void {
-        this.listen('ENTITY_DRAG_S', this.handleOnDragStart);
-        this.listen('ENTITY_DRAGGING', this.handleOnDragging);
-        this.listen('ENTITY_DRAG_E', this.handleOnDragEnd);
+        this.listen(Event.entity.START_MOVEMENT, this.onMoveStart);
+        this.listen(Event.entity.MOVING, this.onMoving);
+        this.listen(Event.entity.STOP_MOVEMENT, this.onMoveEnd);
     }
 
-    private handleOnDragStart(payload: EventPayload): void {
+    private onMoveStart(payload: EventPayload): void {
         const event = payload.event;
-        const target = payload.target;
 
         event.sourceEvent.stopPropagation();
-
-        target.highlightBorders(true);
-
     }
 
-    private handleOnDragging(payload: EventPayload): void {
+    private onMoving(payload: EventPayload): void {
         const event = payload.event;
         const target = payload.target;
 
@@ -35,7 +32,7 @@ export default class MovingController extends ControllerBase {
         target.translate(target.x, target.y);
     }
 
-    private handleOnDragEnd(payload: EventPayload): void {
+    private onMoveEnd(payload: EventPayload): void {
         const event = payload.event;
         const target = payload.target;
 
@@ -43,8 +40,6 @@ export default class MovingController extends ControllerBase {
         target.y += event.dy;
 
         target.translate(target.x, target.y);
-
-        target.highlightBorders(false);
     }
 
 

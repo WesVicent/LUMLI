@@ -11,11 +11,11 @@ export default abstract class ControllerBase {
 
   protected abstract listenToEvents(): void;
 
-  protected listen(event: string, handler: (payload: EventPayload) => void) {
+  protected listen(event: number, handler: (payload: EventPayload) => void) {
     this.eventBus.listen(event, handler);
   }
 
-  protected trigger(event: string, payload: EventPayload) {
+  protected trigger(event: number, payload: EventPayload) {
     this.eventBus.trigger(event, payload);
   }
 }

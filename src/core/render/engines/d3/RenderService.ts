@@ -73,4 +73,8 @@ export default class RenderService {
     public select(selection: string): D3BaseTypeSelection {
         return this.context.getCore().select(selection);
     }
+    
+    public selectAll(selection: string): D3BaseTypeSVGSelection {
+        return this.context.getCore().selectAll(selection);
+    }
 }

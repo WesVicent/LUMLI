@@ -1,5 +1,6 @@
 // Flatten up types.
-type D3BaseTypeSelection = d3.Selection<BaseType, unknown, HTMLElement, any>
+type D3BaseTypeSelection = d3.Selection<BaseType, unknown, HTMLElement, any>;
+type D3BaseTypeSVGSelection = d3.Selection<BaseType, unknown, SVGSVGElement, unknown>;
 
 type D3SVGElement = d3.Selection<SVGSVGElement, unknown, HTMLElement, any>;
 type D3GElement = d3.Selection<SVGGElement, unknown, HTMLElement, any>;

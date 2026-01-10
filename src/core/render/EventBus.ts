@@ -3,28 +3,23 @@ import EventPayload from "./interfaces/EventPayload";
 type EventHandler = (payload: EventPayload) => void;
 
 export class EventBus {
-  private events: Map<string, EventHandler[]> = new Map();
+  private events: Map<number, EventHandler[]> = new Map();
 
-  listen(event: string, callback: EventHandler) {
+  listen(event: number, callback: EventHandler) {
     if (!this.events.has(event)) {
       this.events.set(event, []);
     }
 
     this.events.get(event)!.push(callback);
-
-    console.log('listen', event);
-    
   }
 
-  trigger(event: string, payload: EventPayload) {
+  trigger(event: number, payload: EventPayload) {
     const handlers = this.events.get(event);
     
     handlers && handlers.forEach(handler => handler(payload));
-
-    console.log('triggered', event);
   }
 
-  ignore(event: string, callback: EventHandler) {
+  ignore(event: number, callback: EventHandler) {
     const handlers = this.events.get(event);
     if (handlers) {
       this.events.set(event, handlers.filter(h => h !== callback));

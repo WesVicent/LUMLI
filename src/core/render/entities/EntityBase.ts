@@ -1,4 +1,5 @@
 import { EventBus } from '../EventBus';
+import Event from '../EventNames';
 import EventPayload from '../interfaces/EventPayload';
 import Movable from '../interfaces/Movable';
 import Resizable from '../interfaces/Resizable';
@@ -23,33 +24,36 @@ export default abstract class EntityBase implements Movable, Resizable {
   public abstract draw(): void;
 
   abstract translate(x: number, y: number): void;
-  abstract highlightBorders(shouldHighlight: boolean): void;
 
-  private emit(event: string, data: any) {
+  private emit(event: number, data: any) {
     this.eventBus.trigger(event, { entityId: this.id, ...data });
   }
 
-  protected notifyChanges() {
-    this.emit('ENTITY_CHANGED', { entity: this });
+  protected emitStartMove(payload: EventPayload) {
+    this.emit(Event.entity.START_MOVEMENT, payload);
   }
 
-  protected emitClick() {
-    this.emit('ENTITY_CLICKED', {});
+  protected emitMoving(payload: EventPayload) {
+    this.emit(Event.entity.MOVING, payload);
   }
 
-  protected emitDragStart(payload: EventPayload) {
-    this.emit('ENTITY_DRAG_S', payload);
-  }
-
-  protected emitDragging(payload: EventPayload) {
-    this.emit('ENTITY_DRAGGING', payload);
-  }
-
-  protected emitDragEnd(payload: EventPayload) {
-    this.emit('ENTITY_DRAG_E', payload);
+  protected emitStopMove(payload: EventPayload) {
+    this.emit(Event.entity.STOP_MOVEMENT, payload);
   }
 
   protected emitFocus(payload: EventPayload) {
-    this.emit('ENTITY_FOCUS', payload);
+    this.emit(Event.entity.FOCUS, payload);
+  }
+
+  protected emitStartResize(payload: EventPayload) {
+    this.emit(Event.entity.START_RESIZE, payload);
+  }
+  
+  protected emitResizing(payload: EventPayload) {
+    this.emit(Event.entity.RESIZING, payload);
+  }
+  
+  protected emitStopResize(payload: EventPayload) {
+    this.emit(Event.entity.STOP_RESIZE, payload);
   }
 }

@@ -27,16 +27,18 @@ class Lum {
         const Y_POS = renderContext.vCenter - HEIGHT / 2;
 
         new MovingController(eventBus);
+        new ResizingController(eventBus);
 
         const entities = [
-            new LumCard('card-', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
+            new LumCard('card-1', X_POS - WIDHT, Y_POS - HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
+            new LumCard('card-2', X_POS + WIDHT, Y_POS + HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
+            new LumCard('card-3', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
+
             new ResizeNode('resizing-nodes', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
         ];
 
-
-
         entities.forEach(entity => {
-            // entity.draw();
+            entity.draw();
         });
     }
 }
