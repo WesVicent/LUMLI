@@ -5,6 +5,8 @@ import PositionAndSize from "../interfaces/PositionAndSize";
 import Entity from "./EntityBase";
 import { EventBus } from "../EventBus";
 import EntityEventPayload from "../interfaces/EventPayload";
+import EventPayload from "../interfaces/EventPayload";
+import Event from "../EventNames";
 
 export default class LumCard extends Entity {
     public localGroup!: D3GElement;
@@ -29,6 +31,8 @@ export default class LumCard extends Entity {
 
         this.width = width;
         this.height = height;
+
+        eventBus.listen(Event.entity.RESIZING, this.onResize.bind(this));
 
         // this.text = text;
     }
@@ -56,20 +60,30 @@ export default class LumCard extends Entity {
         this.localGroup.call(selection);
     }
 
-    public onResize(x: number, y: number, width: number, height: number): void {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+    public onResize(eventPayload: EventPayload): void {
+        this.x = eventPayload.target.x;
+        this.y = eventPayload.target.y;
+        this.width = eventPayload.target.width;
+        this.height = eventPayload.target.height;
 
-        this.localGroup.attr("transform", `translate(${this.x}, ${this.y})`);
+        if (this.id === eventPayload.target.id) {
+            this.localGroup.attr("transform", `translate(${this.x}, ${this.y})`);
 
-        this.rect.attr('width', this.width)
-            .attr('height', this.height);
+            this.rect.attr('width', this.width)
+                .attr('height', this.height);
 
-        this.line.attr('x2', this.width)
-            .attr('y1', this.height - (this.height - 18))
-            .attr('y2', this.height - (this.height - 18));
+            this.line.attr('x2', this.width)
+                .attr('y1', this.height - (this.height - 18))
+                .attr('y2', this.height - (this.height - 18));
+        }
+
+        console.log('------------------------------ CARD ONRESIZE');
+        console.log('eventPayload this.x', this.x);
+        console.log('eventPayload this.y', this.y);
+        console.log('eventPayload this.width', this.width);
+        console.log('eventPayload this.height', this.height);
+        console.log('------------------------------');
+        
     }
 
     public getPositionAndSize(): PositionAndSize {
@@ -111,6 +125,9 @@ export default class LumCard extends Entity {
                 this.highlightBorders(false);
                 this.emitStopMove(new EntityEventPayload(event, this));
                 this.emitFocus(new EntityEventPayload(event, this));
+
+                console.log(this);
+                
             });
 
         this.localGroup

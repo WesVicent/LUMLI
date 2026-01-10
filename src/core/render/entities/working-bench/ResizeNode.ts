@@ -35,6 +35,7 @@ export default class ResizeNode extends EntityBase {
 
     private handleFocus(payload: EventPayload) {
         const target = payload.target as EntityBase;
+
         
         this.translate(target.x, target.y);
         this.nodesVisibility(true);
@@ -97,77 +98,6 @@ export default class ResizeNode extends EntityBase {
         this.setupDragHandler();
     }
 
-    private updateResizingNodes(): void {
-        this.nodes.forEach(node => {
-            switch (node.id) {
-                case this.RESIZING_NODES_CLASS_SULFIX.right:
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.right}`)
-                        .attr('x', this.width - this.RESIZING_NODES_SIZE / 2);
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.topRight}`)
-                        .attr('x', this.width - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.bottomRight}`)
-                        .attr('x', this.width - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.top}`)
-                        .attr('x', (this.width / 2) - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.bottom}`)
-                        .attr('x', (this.width / 2) - (this.RESIZING_NODES_SIZE / 2));
-                    break;
-                case this.RESIZING_NODES_CLASS_SULFIX.left:
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.right}`)
-                        .attr('x', this.width - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.topRight}`)
-                        .attr('x', this.width - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.bottomRight}`)
-                        .attr('x', this.width - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.top}`)
-                        .attr('x', (this.width / 2) - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.bottom}`)
-                        .attr('x', (this.width / 2) - (this.RESIZING_NODES_SIZE / 2));
-                    break;
-                case this.RESIZING_NODES_CLASS_SULFIX.bottom:
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.bottom}`)
-                        .attr('y', this.height - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.bottomRight}`)
-                        .attr('y', this.height - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.bottomLeft}`)
-                        .attr('y', this.height - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.right}`)
-                        .attr('y', (this.height / 2) - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.left}`)
-                        .attr('y', (this.height / 2) - (this.RESIZING_NODES_SIZE / 2));
-                    break;
-                case this.RESIZING_NODES_CLASS_SULFIX.top:
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.bottom}`)
-                        .attr('y', this.height - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.bottomRight}`)
-                        .attr('y', this.height - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.bottomLeft}`)
-                        .attr('y', this.height - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.right}`)
-                        .attr('y', (this.height / 2) - (this.RESIZING_NODES_SIZE / 2));
-
-                    this.renderService.context.getCore().select(`.resize-${this.RESIZING_NODES_CLASS_SULFIX.left}`)
-                        .attr('y', (this.height / 2) - (this.RESIZING_NODES_SIZE / 2));
-                    break;
-            }
-        });
-    }
-
     public translate(x?: number, y?: number): void {
         this.x = x || this.x;
         this.y = y || this.y;
@@ -180,20 +110,14 @@ export default class ResizeNode extends EntityBase {
         this.renderService.select('.resize-bottom').attr('x', this.x + (this.width / 2) - this.RESIZING_NODES_SIZE / 2).attr('y', (this.y + this.height) - this.RESIZING_NODES_SIZE / 2);
         this.renderService.select('.resize-bottomLeft').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', (this.y + this.height) - this.RESIZING_NODES_SIZE / 2);
         this.renderService.select('.resize-left').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y + (this.height / 2) - this.RESIZING_NODES_SIZE / 2);
-    }
-    
-    public translate2(x?: number, y?: number): void {
-        this.x = x || this.x;
-        this.y = y || this.y;
 
-        this.renderService.select('.resize-topLeft').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-top').attr('x', this.x + (this.width / 2) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-topRight').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-right').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', 0 + (this.height / 2) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-bottomRight').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', (0 + this.height) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-bottom').attr('x', this.x + (this.width / 2) - this.RESIZING_NODES_SIZE / 2).attr('y', (0 + this.height) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-bottomLeft').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', (0 + this.height) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-left').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y + (this.height / 2) - this.RESIZING_NODES_SIZE / 2);
+
+        console.log('------------------------------ NODE TRANSLATE');
+        // console.log('this.x', this.x);
+        // console.log('this.y', this.y);
+        // console.log('this.width', this.width);
+        // console.log('this.height', this.height);
+        // console.log('------------------------------');
     }
 
     private nodesVisibility(visible: boolean): void {
@@ -212,7 +136,7 @@ export default class ResizeNode extends EntityBase {
                 })
                 .on('drag', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
                     this.emitResizing(new EntityEventPayload(event, this));
-                    this.translate2();
+                    this.translate();
                 })
                 .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
                     this.emitStopResize(new EntityEventPayload(event, this));
