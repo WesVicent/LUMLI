@@ -8,4 +8,9 @@ export default class Event {
         RESIZING: 5,
         STOP_RESIZE: 6,
     };
+
+    public static readonly key = {
+        CTRL_D: 770,
+        CTRL_U: 771,
+    };
 }

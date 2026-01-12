@@ -41,21 +41,21 @@ export default class ResizingController extends Controller {
     }
 
     private handleOnFocus(payload: EventPayload) {
-        this.refId = payload.target.id;
-        this.refWidth = payload.target.width;
-        this.refHeight = payload.target.height;
-        this.refX = payload.target.x;
-        this.refY = payload.target.y;
+        this.refId = payload.target!.id;
+        this.refWidth = payload.target!.width;
+        this.refHeight = payload.target!.height;
+        this.refX = payload.target!.x;
+        this.refY = payload.target!.y;
     }
 
     private handleOnResizeStart(payload: EventPayload) {
-        const event = payload.event;
+        const event = payload.event!;
 
         event.sourceEvent.stopPropagation();
 
         this.isResizing = true;
 
-        payload.target.id = this.refId || '';
+        payload.target!.id = this.refId || '';
 
         this.resizeDirection = d3.select(event.sourceEvent.target as SVGRectElement)
             .attr('class')
@@ -110,51 +110,51 @@ export default class ResizingController extends Controller {
     private handleOnResizeEnd(payload: EventPayload) {
         this.isResizing = false;
         this.resizeDirection = null;
-        payload.target.x += payload.event.dx;
-        payload.target.y += payload.event.dy;
+        payload.target!.x += payload.event!.dx;
+        payload.target!.y += payload.event!.dy;
     }
 
     private resizeTop(payload: EventPayload): void {
-        const newHeight = this.refHeight - (payload.event.y - this.refY);
+        const newHeight = this.refHeight - (payload.event!.y - this.refY);
 
         if (newHeight >= this.MIN_HEIGHT) {
-            payload.target.y = payload.event.y;
-            payload.target.height = newHeight;
+            payload.target!.y = payload.event!.y;
+            payload.target!.height = newHeight;
         } else {
-            payload.target.y = this.refY + (this.refHeight - this.MIN_HEIGHT);
-            payload.target.height = this.MIN_HEIGHT;
+            payload.target!.y = this.refY + (this.refHeight - this.MIN_HEIGHT);
+            payload.target!.height = this.MIN_HEIGHT;
         }
 
-        this.refHeight = payload.target.height;
-        this.refY = payload.target.y;
+        this.refHeight = payload.target!.height;
+        this.refY = payload.target!.y;
     }
 
     private resizeRight(payload: EventPayload): void {
         if (this.refX + this.refWidth > this.MIN_WIDTH) {
-            payload.target.width = Math.max(this.MIN_WIDTH, payload.event.x - this.refX);
-            this.refWidth = payload.target.width;
+            payload.target!.width = Math.max(this.MIN_WIDTH, payload.event!.x - this.refX);
+            this.refWidth = payload.target!.width;
         }
     }
 
     private resizeBottom(payload: EventPayload): void {
         if (this.refY + this.refHeight > this.MIN_HEIGHT) {
-            payload.target.height = Math.max(this.MIN_HEIGHT, payload.event.y - this.refY);
-            this.refHeight = payload.target.height;
+            payload.target!.height = Math.max(this.MIN_HEIGHT, payload.event!.y - this.refY);
+            this.refHeight = payload.target!.height;
         }
     }
 
     private resizeLeft(payload: EventPayload): void {
-        const newWidth = this.refWidth - (payload.event.x - this.refX);
+        const newWidth = this.refWidth - (payload.event!.x - this.refX);
 
         if (newWidth >= this.MIN_WIDTH) {
-            payload.target.x = payload.event.x;
-            payload.target.width = newWidth;
+            payload.target!.x = payload.event!.x;
+            payload.target!.width = newWidth;
         } else {
-            payload.target.x = this.refX + (this.refWidth - this.MIN_WIDTH);
-            payload.target.width = this.MIN_WIDTH;
+            payload.target!.x = this.refX + (this.refWidth - this.MIN_WIDTH);
+            payload.target!.width = this.MIN_WIDTH;
         }
 
-        this.refWidth = payload.target.width;
-        this.refX = payload.target.x;
+        this.refWidth = payload.target!.width;
+        this.refX = payload.target!.x;
     }
 }

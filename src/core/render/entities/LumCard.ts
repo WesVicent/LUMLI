@@ -57,11 +57,11 @@ export default class LumCard extends Entity {
     }
 
     public onResize(eventPayload: EventPayload): void {    
-        if (this.id === eventPayload.target.id) {
-            this.x = eventPayload.target.x;
-            this.y = eventPayload.target.y;
-            this.width = eventPayload.target.width;
-            this.height = eventPayload.target.height;
+        if (this.id === eventPayload.target!.id) {
+            this.x = eventPayload.target!.x;
+            this.y = eventPayload.target!.y;
+            this.width = eventPayload.target!.width;
+            this.height = eventPayload.target!.height;
     
             this.localGroup.attr("transform", `translate(${this.x}, ${this.y})`);
 

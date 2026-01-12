@@ -29,20 +29,25 @@ export default class ResizeNode extends EntityBase {
 
         this.eventBus.listen(Event.entity.FOCUS, this.handleFocus.bind(this));
         this.eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
+        eventBus.listen(Event.key.CTRL_D, this.onCTRLDown.bind(this));
+    }
+
+    private onCTRLDown(): void {
+        console.log('aobaa');
     }
 
     private handleFocus(payload: EventPayload) {
         const target = payload.target as EntityBase;
 
-        this.width = payload.target.width;
-        this.height = payload.target.height;
+        this.width = payload.target!.width;
+        this.height = payload.target!.height;
 
         this.translate(target.x, target.y);
         this.nodesVisibility(true);
     }
 
     private handleMoving(payload: EventPayload) {
-        const target = payload.target as EntityBase;
+        const target = payload.target! as EntityBase;
 
         this.nodesVisibility(false);
         this.translate(target.x, target.y);

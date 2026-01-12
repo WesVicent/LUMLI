@@ -6,6 +6,7 @@ import LumCard from './core/render/entities/LumCard';
 import ResizingController from './core/render/controllers/ResizingController';
 import MovingController from './core/render/controllers/MovingController';
 import ResizeNode from './core/render/entities/working-bench/ResizeNode';
+import KeyboardController from './core/render/controllers/KeyboardController';
 
 class Lum {
     public static init() {
@@ -26,6 +27,7 @@ class Lum {
         const X_POS = renderContext.hCenter - WIDHT / 2;
         const Y_POS = renderContext.vCenter - HEIGHT / 2;
 
+        new KeyboardController(eventBus);
         new MovingController(eventBus);
         new ResizingController(eventBus);
 

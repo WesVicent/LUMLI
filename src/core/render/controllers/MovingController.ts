@@ -17,14 +17,14 @@ export default class MovingController extends ControllerBase {
     }
 
     private onMoveStart(payload: EventPayload): void {
-        const event = payload.event;
+        const event = payload.event!;
 
         event.sourceEvent.stopPropagation();
     }
 
     private onMoving(payload: EventPayload): void {
-        const event = payload.event;
-        const target = payload.target;
+        const event = payload.event!;
+        const target = payload.target!;
 
         target.x += event.dx;
         target.y += event.dy;
@@ -33,12 +33,12 @@ export default class MovingController extends ControllerBase {
     }
 
     private onMoveEnd(payload: EventPayload): void {
-        const event = payload.event;
-        const target = payload.target;
+        const event = payload.event!;
+        const target = payload.target!;
 
         target.x += event.dx;
         target.y += event.dy;
-        
+
         target.translate(target.x, target.y);
     }
 
