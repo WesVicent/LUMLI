@@ -10,7 +10,7 @@ import ResizeNode from './core/render/entities/working-bench/ResizeNode';
 class Lum {
     public static init() {
         const SVG_ID = 'diagram';
-        const svg: D3SVGElement = d3.select(`#${SVG_ID}`);
+        const svg: D3SVGElementSelection = d3.select(`#${SVG_ID}`);
         const element = document.getElementById(SVG_ID);
 
         const contextWidth = element?.clientWidth || 100;

@@ -1,4 +1,4 @@
-import * as d3 from "d3";
+import * as d3 from "d3"; // TODO: remove from here
 import RenderService from "../../engines/d3/RenderService";
 import { EventBus } from "../../EventBus";
 import Event from "../../EventNames";
@@ -9,7 +9,6 @@ import EntityBase from "../EntityBase";
 
 export default class ResizeNode extends EntityBase {
     private nodes: Array<IdAndPositions>;
-    private renderService: RenderService;
 
     private readonly RESIZING_NODES_SIZE: number = 8;
     private readonly RESIZING_NODES_CLASS_SULFIX = {
@@ -24,9 +23,8 @@ export default class ResizeNode extends EntityBase {
     };
 
     constructor(id: string, x: number, y: number, width: number, height: number, renderService: RenderService, eventBus: EventBus) {
-        super(id, x, y, width, height, eventBus);
+        super(id, x, y, width, height, eventBus, renderService);
 
-        this.renderService = renderService;
         this.nodes = this.createNodePositionsArray(x, y, width, height);
 
         this.eventBus.listen(Event.entity.FOCUS, this.handleFocus.bind(this));
@@ -36,14 +34,16 @@ export default class ResizeNode extends EntityBase {
     private handleFocus(payload: EventPayload) {
         const target = payload.target as EntityBase;
 
-        
+        this.width = payload.target.width;
+        this.height = payload.target.height;
+
         this.translate(target.x, target.y);
         this.nodesVisibility(true);
     }
 
     private handleMoving(payload: EventPayload) {
         const target = payload.target as EntityBase;
-        
+
         this.nodesVisibility(false);
         this.translate(target.x, target.y);
     }
@@ -102,22 +102,14 @@ export default class ResizeNode extends EntityBase {
         this.x = x || this.x;
         this.y = y || this.y;
 
-        this.renderService.select('.resize-topLeft').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-top').attr('x', this.x + (this.width / 2) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-topRight').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-right').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y +  (this.height / 2) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-bottomRight').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', (this.y + this.height) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-bottom').attr('x', this.x + (this.width / 2) - this.RESIZING_NODES_SIZE / 2).attr('y', (this.y + this.height) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-bottomLeft').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', (this.y + this.height) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select('.resize-left').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y + (this.height / 2) - this.RESIZING_NODES_SIZE / 2);
-
-
-        console.log('------------------------------ NODE TRANSLATE');
-        // console.log('this.x', this.x);
-        // console.log('this.y', this.y);
-        // console.log('this.width', this.width);
-        // console.log('this.height', this.height);
-        // console.log('------------------------------');
+        this.renderService.select<SVGRectElement>('.resize-topLeft').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-top').attr('x', this.x + (this.width / 2) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-topRight').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-right').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y + (this.height / 2) - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-bottomRight').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', (this.y + this.height) - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-bottom').attr('x', this.x + (this.width / 2) - this.RESIZING_NODES_SIZE / 2).attr('y', (this.y + this.height) - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-bottomLeft').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', (this.y + this.height) - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-left').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y + (this.height / 2) - this.RESIZING_NODES_SIZE / 2);
     }
 
     private nodesVisibility(visible: boolean): void {
@@ -130,19 +122,19 @@ export default class ResizeNode extends EntityBase {
     }
 
     private setupDragHandler(): void {
-            const dragHandler = d3.drag<SVGGElement, unknown, void>()
-                .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                    this.emitStartResize(new EntityEventPayload(event, this));
-                })
-                .on('drag', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                    this.emitResizing(new EntityEventPayload(event, this));
-                    this.translate();
-                })
-                .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                    this.emitStopResize(new EntityEventPayload(event, this));
-                });
-    
-            this.renderService.selectAll('#rsz-node')
-                .call(dragHandler);
-        }
+        const dragHandler = d3.drag<SVGGElement, unknown, void>()
+            .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
+                this.emitStartResize(new EntityEventPayload(event, this));
+            })
+            .on('drag', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
+                this.emitResizing(new EntityEventPayload(event, this));
+                this.translate();
+            })
+            .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
+                this.emitStopResize(new EntityEventPayload(event, this));
+            });
+
+        this.renderService.selectAll<SVGGElement>('#rsz-node')
+            .call(dragHandler);
+    }
 }

@@ -12,14 +12,16 @@ export default class RenderService {
 
     /////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////  PRIMITIVES  ///////////////////////////////      
-    public createPrimitiveGroup(x: number, y: number, width: number, height: number): D3GElement {
-        return this.context.append('g')
-        .attr("transform", `translate(${x}, ${y})`)
-        .attr('width', width)       // Maybe doesn't matter
-        .attr('height', height);    // Maybe doesn't matter
+    public createPrimitiveGroup(id: string, x: number, y: number, width: number, height: number): D3GElementSelection {
+        return this.context.append<SVGGElement>('g')
+            .attr("transform", `translate(${x}, ${y})`)
+            .attr('width', width)       // Maybe doesn't matter
+            .attr('height', height)    // Maybe doesn't matter
+            .attr("id", id);
+
     }
 
-    public drawPrimitiveRect(x: number, y: number, width: number, height: number, group?: D3GElement): D3RectElement {
+    public drawPrimitiveRect(x: number, y: number, width: number, height: number, group?: D3GElementSelection): D3RectElementSelection {
         const node = group ?? this.context.getCore();
 
         const rect = node
@@ -35,7 +37,7 @@ export default class RenderService {
         return rect;
     }
 
-    public drawPrimitiveLine(x: number, y: number, width: number, group?: D3GElement): D3LineElement {
+    public drawPrimitiveLine(x: number, y: number, width: number, group?: D3GElementSelection): D3LineElementSelection {
         const node = group ?? this.context.getCore();
 
         const line = node.append('line')
@@ -49,7 +51,7 @@ export default class RenderService {
         return line;
     }
 
-    public drawPrimitiveText(x: number, y: number, fontSize: number, text: string, group?: D3GElement): D3TextElement {
+    public drawPrimitiveText(x: number, y: number, fontSize: number, text: string, group?: D3GElementSelection): D3TextElementSelection {
         const node = group ?? this.context.getCore();
 
         const textElement = node.append('text')
@@ -70,11 +72,11 @@ export default class RenderService {
     }
     /////////////////////////////////////////////////////////////////////////////////////
 
-    public select(selection: string): D3BaseTypeSelection {
-        return this.context.getCore().select(selection);
+    public select<T extends D3BaseType = D3BaseType>(selector: string): D3Selection<T, unknown, HTMLElement, any> {
+        return this.context.getCore().select(selector) as D3Selection<T, unknown, HTMLElement, any>;
     }
-    
-    public selectAll(selection: string): D3BaseTypeSVGSelection {
-        return this.context.getCore().selectAll(selection);
+
+    public selectAll<T extends D3BaseType = D3BaseType>(selection: string): D3Selection<T, unknown, SVGSVGElement, any> {
+        return this.context.getCore().selectAll(selection) as D3Selection<T, unknown, SVGSVGElement, any>;
     }
 }

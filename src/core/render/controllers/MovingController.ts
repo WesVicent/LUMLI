@@ -38,7 +38,7 @@ export default class MovingController extends ControllerBase {
 
         target.x += event.dx;
         target.y += event.dy;
-
+        
         target.translate(target.x, target.y);
     }
 

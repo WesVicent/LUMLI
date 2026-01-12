@@ -1,24 +1,24 @@
 export default class RenderContext {
-    private svg: D3SVGElement;
+    private svg: D3SVGElementSelection;
     public readonly width: number;
     public readonly height: number;
 
-    public readonly hCenter:number
-    public readonly vCenter:number
+    public readonly hCenter: number
+    public readonly vCenter: number
 
-    constructor(svg: D3SVGElement, width: number, height: number) {
+    constructor(svg: D3SVGElementSelection, width: number, height: number) {
         this.svg = svg;
         this.width = width;
         this.height = height;
-        this.hCenter = width /2;
-        this.vCenter = height /2;
+        this.hCenter = width / 2;
+        this.vCenter = height / 2;
     }
 
-    public append(name: string): D3BaseTypeSelection {
-        return this.svg.append(name);
+    public append<T extends D3BaseType>(name: string): D3Selection<T> {
+        return this.svg.append(name) as D3Selection<T>;
     }
 
-    public getCore(): D3SVGElement {
+    public getCore(): D3SVGElementSelection {
         return this.svg;
     }
 }

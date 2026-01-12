@@ -1,3 +1,4 @@
+import RenderService from '../engines/d3/RenderService';
 import { EventBus } from '../EventBus';
 import Event from '../EventNames';
 import EventPayload from '../interfaces/EventPayload';
@@ -6,14 +7,16 @@ import Resizable from '../interfaces/Resizable';
 
 export default abstract class EntityBase implements Movable, Resizable {
   protected eventBus: EventBus;
+  public renderService: RenderService;
   public id: string;
   public x: number;
   public y: number;
   public width: number;
   public height: number;
 
-  constructor(id: string, x: number, y: number, width: number, height: number, eventBus: EventBus) {
+  constructor(id: string, x: number, y: number, width: number, height: number, eventBus: EventBus, renderService: RenderService) {
     this.eventBus = eventBus;
+    this.renderService = renderService;
     this.id = id;
     this.x = x;
     this.y = y;

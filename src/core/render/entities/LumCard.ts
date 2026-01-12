@@ -9,22 +9,18 @@ import EventPayload from "../interfaces/EventPayload";
 import Event from "../EventNames";
 
 export default class LumCard extends Entity {
-    public localGroup!: D3GElement;
+    public localGroup!: D3GElementSelection;
 
-    private rect!: D3RectElement;
-    private line!: D3LineElement;
+    private rect!: D3RectElementSelection;
+    private line!: D3LineElementSelection;
     // private text: LumText;
-
-    renderService: RenderService;
 
     // Resizing
     private readonly MIN_WIDTH = 40;
     private readonly MIN_HEIGHT = 40;
 
     constructor(id: string, x: number, y: number, width: number, height: number, renderService: RenderService, eventBus: EventBus) {
-        super(id, x, y, width, height, eventBus);
-
-        this.renderService = renderService;
+        super(id, x, y, width, height, eventBus, renderService);
 
         width = width < this.MIN_WIDTH ? this.MIN_WIDTH : width;
         height = height < this.MIN_HEIGHT ? this.MIN_HEIGHT : height;
@@ -38,7 +34,7 @@ export default class LumCard extends Entity {
     }
 
     public draw(): void {
-        this.localGroup = this.renderService.createPrimitiveGroup(this.x, this.y, this.width, this.height);
+        this.localGroup = this.renderService.createPrimitiveGroup(this.id, this.x, this.y, this.width, this.height);
         // let stringText = '123456789-12345678';
 
         const rect = this.renderService.drawPrimitiveRect(0, 0, this.width, this.height, this.localGroup);
@@ -60,30 +56,22 @@ export default class LumCard extends Entity {
         this.localGroup.call(selection);
     }
 
-    public onResize(eventPayload: EventPayload): void {
-        this.x = eventPayload.target.x;
-        this.y = eventPayload.target.y;
-        this.width = eventPayload.target.width;
-        this.height = eventPayload.target.height;
-
+    public onResize(eventPayload: EventPayload): void {    
         if (this.id === eventPayload.target.id) {
+            this.x = eventPayload.target.x;
+            this.y = eventPayload.target.y;
+            this.width = eventPayload.target.width;
+            this.height = eventPayload.target.height;
+    
             this.localGroup.attr("transform", `translate(${this.x}, ${this.y})`);
 
             this.rect.attr('width', this.width)
-                .attr('height', this.height);
+            .attr('height', this.height);
 
             this.line.attr('x2', this.width)
                 .attr('y1', this.height - (this.height - 18))
                 .attr('y2', this.height - (this.height - 18));
         }
-
-        console.log('------------------------------ CARD ONRESIZE');
-        console.log('eventPayload this.x', this.x);
-        console.log('eventPayload this.y', this.y);
-        console.log('eventPayload this.width', this.width);
-        console.log('eventPayload this.height', this.height);
-        console.log('------------------------------');
-        
     }
 
     public getPositionAndSize(): PositionAndSize {
@@ -124,10 +112,7 @@ export default class LumCard extends Entity {
             .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
                 this.highlightBorders(false);
                 this.emitStopMove(new EntityEventPayload(event, this));
-                this.emitFocus(new EntityEventPayload(event, this));
-
-                console.log(this);
-                
+                this.emitFocus(new EntityEventPayload(event, this));                
             });
 
         this.localGroup

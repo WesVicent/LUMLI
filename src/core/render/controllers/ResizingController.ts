@@ -46,15 +46,6 @@ export default class ResizingController extends Controller {
         this.refHeight = payload.target.height;
         this.refX = payload.target.x;
         this.refY = payload.target.y;
-
-        console.log('------------------------------ RESZ H_ONFOCUS');
-        console.log('this.refId', this.refId);
-        console.log('this.refWidth', this.refWidth);
-        console.log('this.refHeight', this.refHeight);
-        console.log('this.refX', this.refX);
-        console.log('this.refY', this.refY);
-        console.log('------------------------------');
-        
     }
 
     private handleOnResizeStart(payload: EventPayload) {
@@ -121,7 +112,6 @@ export default class ResizingController extends Controller {
         this.resizeDirection = null;
         payload.target.x += payload.event.dx;
         payload.target.y += payload.event.dy;
-
     }
 
     private resizeTop(payload: EventPayload): void {
