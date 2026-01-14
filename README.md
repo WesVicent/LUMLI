@@ -134,8 +134,6 @@ npm run type-check
 - **D3.js** community for the powerful visualization library
 - **UML** specification creators for the standardized notation
 - **TypeScript** for the excellent development experience
-- Join our [discussions](../../discussions)
-
 ---
 
 **Happy Diagramming!** 🎉
