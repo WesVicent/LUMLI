@@ -1,4 +1,14 @@
-# LUM
+# LUMLI
+
+Layered
+
+Unified
+
+Model
+
+Logic
+
+Inspector
 
 A UML class diagram editor built with TypeScript and D3.js. Create class diagrams based on a simple JSON entry, visualize/edit it.
 
