@@ -13,6 +13,7 @@ export default abstract class EntityBase implements Movable, Resizable {
   public y: number;
   public width: number;
   public height: number;
+  protected isSelected: boolean = false;
 
   constructor(id: string, x: number, y: number, width: number, height: number, eventBus: EventBus, renderService: RenderService) {
     this.eventBus = eventBus;
@@ -22,7 +23,37 @@ export default abstract class EntityBase implements Movable, Resizable {
     this.y = y;
     this.width = width;
     this.height = height;
+
+    this.eventBus.listen(Event.selection.SELECT, this.onSelected.bind(this));
+    this.eventBus.listen(Event.selection.UNSELECT, this.onUnselected.bind(this));
+    this.eventBus.listen(Event.selection.CLEAR, this.onSelectionClear.bind(this));
   }
+
+  protected emitClick(event?: LumMultiDragEvent) {
+    this.emit(Event.entity.CLICK, new EventPayload(event as D3DragGroupEvent | undefined, this));
+  }
+
+  private onSelected(payload: EventPayload) {    
+    if (payload.target?.id === this.id) {
+      this.isSelected = true;
+      this.setSelected(true);
+    }
+  }
+
+  private onUnselected(payload: EventPayload) {
+    if (payload.target?.id === this.id) {
+      this.isSelected = false;
+      this.setSelected(false);
+    }
+  }
+
+  private onSelectionClear() {
+    this.isSelected = false;
+    this.setSelected(false);
+  }
+
+  // Abstract method for subclasses to implement visual selection
+  protected abstract setSelected(selected: boolean): void;
 
   public abstract draw(): void;
 
@@ -51,11 +82,11 @@ export default abstract class EntityBase implements Movable, Resizable {
   protected emitStartResize(payload: EventPayload) {
     this.emit(Event.entity.START_RESIZE, payload);
   }
-  
+
   protected emitResizing(payload: EventPayload) {
     this.emit(Event.entity.RESIZING, payload);
   }
-  
+
   protected emitStopResize(payload: EventPayload) {
     this.emit(Event.entity.STOP_RESIZE, payload);
   }

@@ -18,4 +18,6 @@ type D3DragRectEvent = d3.D3DragEvent<SVGRectElement, unknown, void>;
 type D3DragRectBehavior = d3.DragBehavior<SVGRectElement, unknown, void>;
 type D3DragRectFunction = (selection: D3RectElementSelection) => void;
 
-type D3DragGroupFunction = (selection: D3GElementSelection) => void;                   
+type D3DragGroupFunction = (selection: D3GElementSelection) => void;
+
+type LumMultiDragEvent = D3DragGroupEvent | D3DragRectEvent;

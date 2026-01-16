@@ -28,28 +28,42 @@ export default class ResizeNode extends EntityBase {
         this.nodes = this.createNodePositionsArray(x, y, width, height);
 
         this.eventBus.listen(Event.entity.FOCUS, this.handleFocus.bind(this));
+        // eventBus.listen(Event.selection.CHANGED, this.handleSelectionChanged.bind(this));
         this.eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
-        eventBus.listen(Event.key.CTRL_D, this.onCTRLDown.bind(this));
     }
 
-    private onCTRLDown(): void {
-        console.log('aobaa');
+    private handleSelectionChanged(payload: EventPayload) {
+        const selectedCount = 1;
+
+        if (selectedCount === 1) {
+            this.isNodesVisible(true);
+        } else {
+            this.isNodesVisible(false);
+        }
     }
 
-    private handleFocus(payload: EventPayload) {
+    protected setSelected(selected: boolean): void {
+        this.isSelected = selected;
+    }
+
+    public transform(x: number, y: number, width: number, height: number): void {
+            this.width = width;
+            this.height = height;
+            this.translate(x, y);
+    }
+
+    private handleFocus(payload: EventPayload): void {
         const target = payload.target as EntityBase;
 
-        this.width = payload.target!.width;
-        this.height = payload.target!.height;
+        this.transform(target.x, target.y, target.width, target.height);
 
-        this.translate(target.x, target.y);
-        this.nodesVisibility(true);
+        this.isNodesVisible(true);
     }
 
     private handleMoving(payload: EventPayload) {
         const target = payload.target! as EntityBase;
 
-        this.nodesVisibility(false);
+        this.isNodesVisible(false);
         this.translate(target.x, target.y);
     }
 
@@ -117,7 +131,7 @@ export default class ResizeNode extends EntityBase {
         this.renderService.select<SVGRectElement>('.resize-left').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y + (this.height / 2) - this.RESIZING_NODES_SIZE / 2);
     }
 
-    private nodesVisibility(visible: boolean): void {
+    private isNodesVisible(visible: boolean): void {
         if (visible) {
             this.renderService.selectAll('#rsz-node').attr('display', 'block');
             return;

@@ -100,24 +100,37 @@ export default class LumCard extends Entity {
             .style("stroke", color);
     }
 
+    protected setSelectionVisuals(selected: boolean): void {
+        // Default implementation - override in subclasses
+        this.highlightBorders(selected);
+    }
+
     private setupDragHandler(): void {
         const dragHandler = d3.drag<SVGGElement, unknown, void>()
             .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.highlightBorders(true);
+                this.emitClick(event);
+                this.setSelectionVisuals(true);
                 this.emitStartMove(new EntityEventPayload(event, this));
             })
             .on('drag', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
                 this.emitMoving(new EntityEventPayload(event, this));
             })
             .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.highlightBorders(false);
+                 if (this.isSelected) {
+                    this.emitFocus(new EntityEventPayload(event, this));
+                }
+                
+                this.setSelectionVisuals(false);
                 this.emitStopMove(new EntityEventPayload(event, this));
-                this.emitFocus(new EntityEventPayload(event, this));                
             });
-
+        
         this.localGroup
             .style('cursor', 'grab')
             .call(dragHandler);
+    }
+    
+    protected setSelected(selected: boolean): void {
+        this.highlightBorders(selected);
     }
 
     public translate(x: number, y: number): void {

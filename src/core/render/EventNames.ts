@@ -7,7 +7,16 @@ export default class Event {
         START_RESIZE: 4,
         RESIZING: 5,
         STOP_RESIZE: 6,
+        CLICK: 7,
     };
+
+    public static readonly selection = {
+        SELECT: 110,
+        UNSELECT: 111,
+        CHANGED: 112,
+        CLEAR: 113
+    };
+
 
     public static readonly key = {
         CTRL_D: 770,

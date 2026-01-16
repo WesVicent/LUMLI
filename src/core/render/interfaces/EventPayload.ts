@@ -1,7 +1,5 @@
 import EntityBase from "../entities/EntityBase";
-import Movable from "./Movable";
 
-type LumMultiDragEvent = D3DragGroupEvent | D3DragRectEvent;
 type LumMultiEventTarget = EntityBase;
 
 export default class EventPayload {
