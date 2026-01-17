@@ -1,7 +1,7 @@
 import { EventBus } from "../../event/EventBus";
 import Event from "../../event/EventNames";
+import EventPayload from "../../event/types/EventPayload";
 import Entity from "../entities/Entity";
-import EventPayload from "../interfaces/EventPayload";
 import Controller from "./Controller";
 
 export default class MovingController extends Controller {

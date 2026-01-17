@@ -1,9 +1,9 @@
 import * as d3 from "d3";
 import Controller from "./Controller";
-import EventPayload from "../interfaces/EventPayload";
 import Entity from "../entities/Entity";
 import { EventBus } from "../../event/EventBus";
 import Event from "../../event/EventNames";
+import EventPayload from "../../event/types/EventPayload";
 
 export default class ResizingController extends Controller {
 
