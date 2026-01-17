@@ -1,14 +1,13 @@
 import * as d3 from "d3"; // TODO: remove from here
 import RenderService from "../../engines/d3/RenderService";
-import { EventBus } from "../../EventBus";
-import Event from "../../EventNames";
-import EventPayload from "../../interfaces/EventPayload";
-import IdAndPositions from "../../interfaces/IdAndPositions";
-import EntityEventPayload from "../../interfaces/EventPayload";
-import EntityBase from "../EntityBase";
-import EntityProps from "../../interfaces/EntityProps";
+import IdAndPositions from "../interfaces/IdAndPositions";
+import Entity from "../Entity";
+import EntityBase from "../types/EntityBase";
+import { EventBus } from "../../../event/EventBus";
+import Event from "../../../event/EventNames";
+import EventPayload from "../../../event/types/EventPayload";
 
-export default class ResizeNode extends EntityBase {
+export default class ResizeNode extends Entity {
     private nodes: Array<IdAndPositions>;
 
     private readonly RESIZING_NODES_SIZE: number = 8;
@@ -46,7 +45,7 @@ export default class ResizeNode extends EntityBase {
     }
 
     private handleSelectionChange(payload: EventPayload): void {
-        const target = payload.target as EntityProps;
+        const target = payload.target as EntityBase;
 
         this.transform(target.x, target.y, target.width, target.height);
 
@@ -54,7 +53,7 @@ export default class ResizeNode extends EntityBase {
     }
 
     private handleMoving(payload: EventPayload) {
-        const target = payload.target! as EntityBase;
+        const target = payload.target! as Entity;
 
         this.isNodesVisible(false);
         this.translate(target.x, target.y);
@@ -136,14 +135,14 @@ export default class ResizeNode extends EntityBase {
     private setupDragHandler(): void {
         const dragHandler = d3.drag<SVGGElement, unknown, void>()
             .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.emitStartResize(new EntityEventPayload(event, this));
+                this.emitStartResize(new EventPayload(event, this));
             })
             .on('drag', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.emitResizing(new EntityEventPayload(event, this));
+                this.emitResizing(new EventPayload(event, this));
                 this.translate();
             })
             .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.emitStopResize(new EntityEventPayload(event, this));
+                this.emitStopResize(new EventPayload(event, this));
             });
 
         this.renderService.selectAll<SVGGElement>('#rsz-node')

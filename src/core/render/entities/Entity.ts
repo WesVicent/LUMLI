@@ -1,11 +1,10 @@
+import { EventBus } from '../../event/EventBus';
+import Event from '../../event/EventNames';
+import EventPayload from '../../event/types/EventPayload';
 import RenderService from '../engines/d3/RenderService';
-import { EventBus } from '../EventBus';
-import Event from '../EventNames';
-import EventPayload from '../interfaces/EventPayload';
-import Movable from '../interfaces/Movable';
-import Resizable from '../interfaces/Resizable';
+import EntityBase from './types/EntityBase';
 
-export default abstract class EntityBase implements Movable, Resizable {
+export default abstract class Entity extends EntityBase {
   protected eventBus: EventBus;
   public renderService: RenderService;
   public id: string;
@@ -16,6 +15,8 @@ export default abstract class EntityBase implements Movable, Resizable {
   protected isSelected: boolean = false;
 
   constructor(id: string, x: number, y: number, width: number, height: number, eventBus: EventBus, renderService: RenderService) {
+    super(id, x, y, width, height);
+
     this.eventBus = eventBus;
     this.renderService = renderService;
     this.id = id;
@@ -34,7 +35,7 @@ export default abstract class EntityBase implements Movable, Resizable {
   }
 
   private onSelected(payload: EventPayload) {        
-    if ((payload.target as EntityBase)?.id === this.id) {
+    if ((payload.target as Entity)?.id === this.id) {
       this.isSelected = true;
       this.setSelected(true);
     }
@@ -42,7 +43,7 @@ export default abstract class EntityBase implements Movable, Resizable {
 
   private onUnselected(payload: EventPayload) {    
     
-    if ((payload.target as EntityBase)?.id === this.id) {
+    if ((payload.target as Entity)?.id === this.id) {
       this.isSelected = false;
       this.setSelected(false);
       console.log(this.isSelected, 'is Selected');

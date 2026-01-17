@@ -1,4 +1,4 @@
-import EventPayload from "./interfaces/EventPayload";
+import EventPayload from "./types/EventPayload";
 
 type EventHandler = (payload: EventPayload) => void;
 

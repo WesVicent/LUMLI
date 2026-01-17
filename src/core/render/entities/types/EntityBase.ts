@@ -1,7 +1,7 @@
-import Movable from "./Movable";
-import Resizable from "./Resizable";
+import Movable from "../interfaces/Movable";
+import Resizable from "../interfaces/Resizable";
 
-export default class EntityProps implements Movable, Resizable {
+export default class EntityBase implements Movable, Resizable {
     public id: string;
     public x: number;
     public y: number;

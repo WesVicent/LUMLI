@@ -1,9 +1,10 @@
-import { EventBus } from "../EventBus";
-import Event from "../EventNames";
+import { EventBus } from "../../event/EventBus";
+import Event from "../../event/EventNames";
+import Entity from "../entities/Entity";
 import EventPayload from "../interfaces/EventPayload";
-import ControllerBase from "./ControllerBase";
+import Controller from "./Controller";
 
-export default class MovingController extends ControllerBase {
+export default class MovingController extends Controller {
 
     constructor(eventBus: EventBus) {
         super(eventBus);
@@ -24,7 +25,7 @@ export default class MovingController extends ControllerBase {
 
     private onMoving(payload: EventPayload): void {
         const event = payload.event!;
-        const target = payload.target!;
+        const target = payload.target! as Entity;
 
         target.x += event.dx;
         target.y += event.dy;
@@ -34,7 +35,7 @@ export default class MovingController extends ControllerBase {
 
     private onMoveEnd(payload: EventPayload): void {
         const event = payload.event!;
-        const target = payload.target!;
+        const target = payload.target! as Entity;
 
         target.x += event.dx;
         target.y += event.dy;

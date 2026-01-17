@@ -1,9 +1,9 @@
 import * as d3 from "d3";
-import Controller from "./ControllerBase";
-import { EventBus } from "../EventBus";
+import Controller from "./Controller";
 import EventPayload from "../interfaces/EventPayload";
-import Event from "../EventNames";
-import EntityBase from "../entities/EntityBase";
+import Entity from "../entities/Entity";
+import { EventBus } from "../../event/EventBus";
+import Event from "../../event/EventNames";
 
 export default class ResizingController extends Controller {
 
@@ -42,7 +42,7 @@ export default class ResizingController extends Controller {
     }
 
     private handleOnFocus(payload: EventPayload) {
-        this.refId = (payload.target as EntityBase)?.id;
+        this.refId = (payload.target as Entity)?.id;
         this.refWidth = payload.target!.width;
         this.refHeight = payload.target!.height;
         this.refX = payload.target!.x;
@@ -56,7 +56,7 @@ export default class ResizingController extends Controller {
 
         this.isResizing = true;
 
-        (payload.target as EntityBase)!.id = this.refId || '';
+        (payload.target as Entity)!.id = this.refId || '';
 
         this.resizeDirection = d3.select(event.sourceEvent.target as SVGRectElement)
             .attr('class')

@@ -1,7 +1,7 @@
-import { EventBus } from '../EventBus';
+import { EventBus } from '../../event/EventBus';
 import EventPayload from '../interfaces/EventPayload';
 
-export default abstract class ControllerBase {
+export default abstract class Controller {
   protected eventBus: EventBus;
 
   constructor(eventBus: EventBus) {

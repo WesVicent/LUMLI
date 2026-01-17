@@ -1,13 +1,13 @@
 import * as d3 from 'd3';
 import RenderService from './core/render/engines/d3/RenderService'
 import RenderContext from './core/render/engines/d3/RenderContext';
-import { EventBus } from './core/render/EventBus';
-import LumCard from './core/render/entities/LumCard';
+import LumCard from './core/render/entities/components/LumCard';
 import ResizingController from './core/render/controllers/ResizingController';
 import MovingController from './core/render/controllers/MovingController';
-import ResizeNode from './core/render/entities/working-bench/ResizeNode';
-import KeyboardController from './core/render/controllers/KeyboardController';
+import ResizeNode from './core/render/entities/GUI/ResizeNode';
 import SelectionController from './core/render/controllers/SelectionController';
+import KeyboardStateManager from './core/input/KeyboardStateManager';
+import { EventBus } from './core/event/EventBus';
 
 class Lum {
     public static init() {
@@ -28,11 +28,11 @@ class Lum {
         const X_POS = renderContext.hCenter - WIDHT / 2;
         const Y_POS = renderContext.vCenter - HEIGHT / 2;
 
-        const keyboardController = new KeyboardController(eventBus);
+        const keyboardStateManager = new KeyboardStateManager(eventBus);
 
         new MovingController(eventBus);
         new ResizingController(eventBus);
-        new SelectionController(eventBus, keyboardController);
+        new SelectionController(eventBus, keyboardStateManager);
 
         const entities = [
             new LumCard('card-1', X_POS - WIDHT, Y_POS - HEIGHT, WIDHT, HEIGHT, renderService, eventBus),

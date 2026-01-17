@@ -1,8 +1,8 @@
-import { EventBus } from "../EventBus";
-import Event from "../EventNames";
-import EventPayload from "../interfaces/EventPayload";
+import { EventBus } from "../event/EventBus";
+import Event from "../event/EventNames";
+import EventPayload from "../event/types/EventPayload";
 
-export default class KeyboardController {
+export default class KeyboardStateManager {
     private ctrlPressed: boolean = false;
     private shiftPressed: boolean = false;
     private altPressed: boolean = false;
