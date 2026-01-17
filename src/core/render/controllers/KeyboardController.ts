@@ -33,10 +33,7 @@ export default class KeyboardController {
         switch (event.key) {
             case 'Control':
             case 'Meta':
-                if (!this.ctrlPressed) {
-                    this.ctrlPressed = true;
-                    this.eventBus.trigger(Event.key.CTRL_D, new EventPayload());
-                }
+                this.ctrlPressed = true;
                 break;
             case 'Shift':
                 this.shiftPressed = true;

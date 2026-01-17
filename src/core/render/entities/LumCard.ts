@@ -1,12 +1,13 @@
 import * as d3 from "d3";
 import RenderService from "../engines/d3/RenderService";
 // import LumText from "./LumText";
-import PositionAndSize from "../interfaces/PositionAndSize";
+import EntityProps from "../interfaces/EntityProps";
 import Entity from "./EntityBase";
 import { EventBus } from "../EventBus";
 import EntityEventPayload from "../interfaces/EventPayload";
 import EventPayload from "../interfaces/EventPayload";
 import Event from "../EventNames";
+import EntityBase from "./EntityBase";
 
 export default class LumCard extends Entity {
     public localGroup!: D3GElementSelection;
@@ -56,17 +57,17 @@ export default class LumCard extends Entity {
         this.localGroup.call(selection);
     }
 
-    public onResize(eventPayload: EventPayload): void {    
-        if (this.id === eventPayload.target!.id) {
+    public onResize(eventPayload: EventPayload): void {
+        if (this.id === (eventPayload.target as EntityBase)!.id) {
             this.x = eventPayload.target!.x;
             this.y = eventPayload.target!.y;
             this.width = eventPayload.target!.width;
             this.height = eventPayload.target!.height;
-    
+
             this.localGroup.attr("transform", `translate(${this.x}, ${this.y})`);
 
             this.rect.attr('width', this.width)
-            .attr('height', this.height);
+                .attr('height', this.height);
 
             this.line.attr('x2', this.width)
                 .attr('y1', this.height - (this.height - 18))
@@ -74,13 +75,8 @@ export default class LumCard extends Entity {
         }
     }
 
-    public getPositionAndSize(): PositionAndSize {
-        return {
-            x: this.x,
-            y: this.y,
-            width: this.width,
-            height: this.height,
-        }
+    public getPositionAndSize(): EntityProps {
+        return new EntityProps (this.id, this.x, this.y, this.width, this.height);
     }
 
     public highlightBorders(highlight: boolean): void {
@@ -101,14 +97,15 @@ export default class LumCard extends Entity {
     }
 
     protected setSelectionVisuals(selected: boolean): void {
-        // Default implementation - override in subclasses
         this.highlightBorders(selected);
     }
 
     private setupDragHandler(): void {
         const dragHandler = d3.drag<SVGGElement, unknown, void>()
+            .filter(() => {
+                return true; // Allow all events
+            })
             .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.emitClick(event);
                 this.setSelectionVisuals(true);
                 this.emitStartMove(new EntityEventPayload(event, this));
             })
@@ -116,19 +113,24 @@ export default class LumCard extends Entity {
                 this.emitMoving(new EntityEventPayload(event, this));
             })
             .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                 if (this.isSelected) {
-                    this.emitFocus(new EntityEventPayload(event, this));
+                this.emitClick(event);
+
+                if (this.isSelected) {
+                    this.setSelectionVisuals(true);
+                } else {
+                    console.log('notSelected');
+                    
+                    this.setSelectionVisuals(false);
                 }
-                
-                this.setSelectionVisuals(false);
+
                 this.emitStopMove(new EntityEventPayload(event, this));
             });
-        
+
         this.localGroup
             .style('cursor', 'grab')
             .call(dragHandler);
     }
-    
+
     protected setSelected(selected: boolean): void {
         this.highlightBorders(selected);
     }

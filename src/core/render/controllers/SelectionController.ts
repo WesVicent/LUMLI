@@ -3,6 +3,7 @@ import { EventBus } from "../EventBus";
 import Event from "../EventNames";
 import EventPayload from "../interfaces/EventPayload";
 import EntityBase from "../entities/EntityBase";
+import EntityProps from "../interfaces/EntityProps";
 
 export default class SelectionController {
     private selected: EntityBase[] = [];
@@ -17,39 +18,65 @@ export default class SelectionController {
     }
 
     private handleEntityClick(payload: EventPayload) {
-        const entity = payload.target;
-        
+        const entity = payload.target as EntityBase;
+
         if (!entity) return;
 
         if (this.inputState.isCtrlPressed()) {
+            if (this.selected.includes(entity)) {
+                this.removeFromSelection(entity);
+                return;
+            }
+
             this.addToSelection(entity);
+        } else {
+            this.changeSelection(entity);
+        }
+    }
+
+    private removeFromSelection(entity: EntityBase): void {
+        this.selected = this.selected.filter(e => e.id !== entity.id);
+
+        this.eventBus.trigger(Event.selection.UNSELECT, new EventPayload(undefined, this.calculateBoundaries(entity.id)));
+    }
+
+    private changeSelection(entity: EntityBase): void {
+        this.clearSelection();
+        this.selected[0] = entity;
+
+        this.eventBus.trigger(Event.selection.SELECT, new EventPayload(undefined, entity));
+    }
+
+    private addToSelection(entity: EntityBase): void {
+        if (!this.selected.includes(entity)) {
+            this.selected.push(entity);
         }
 
-        this.emitSelectionChanged();
+        this.eventBus.trigger(Event.selection.SELECT, new EventPayload(undefined, this.calculateBoundaries(entity.id)));
     }
 
-    private addToSelection(entity: EntityBase) {
-        this.selected.push(entity);
-        this.eventBus.trigger(
-            Event.selection.SELECT,
-            new EventPayload(undefined, this.selected.find(e => e.id === entity.id))
-        );
-    }
+    private calculateBoundaries(id: string): EntityProps {
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
 
-    private emitSelectionChanged() {
-        this.eventBus.trigger(
-            Event.selection.CHANGED,
-            new EventPayload(undefined, undefined) // We'll handle data differently
-        );
-    }
+        this.selected.forEach(entity => {
+            const entityRight = entity.x + entity.width;
+            const entityBottom = entity.y + entity.height;
 
-    private getEntityReference(entityId: string): any {
-        // This is a placeholder - in reality you'd get this from your entity registry
-        return { id: entityId };
+            minX = Math.min(minX, entity.x);
+            minY = Math.min(minY, entity.y);
+            maxX = Math.max(maxX, entityRight);
+            maxY = Math.max(maxY, entityBottom);
+        });
+
+        return  new EntityProps(id, minX, minY, maxX - minX, maxY - minY);
     }
 
     public clearSelection(): void {
         this.selected.length = 0;
+
         this.eventBus.trigger(Event.selection.CLEAR, new EventPayload());
     }
 }

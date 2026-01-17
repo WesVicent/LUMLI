@@ -6,6 +6,7 @@ import EventPayload from "../../interfaces/EventPayload";
 import IdAndPositions from "../../interfaces/IdAndPositions";
 import EntityEventPayload from "../../interfaces/EventPayload";
 import EntityBase from "../EntityBase";
+import EntityProps from "../../interfaces/EntityProps";
 
 export default class ResizeNode extends EntityBase {
     private nodes: Array<IdAndPositions>;
@@ -27,19 +28,11 @@ export default class ResizeNode extends EntityBase {
 
         this.nodes = this.createNodePositionsArray(x, y, width, height);
 
-        this.eventBus.listen(Event.entity.FOCUS, this.handleFocus.bind(this));
+        // this.eventBus.listen(Event.entity.FOCUS, this.handleFocus.bind(this));
         // eventBus.listen(Event.selection.CHANGED, this.handleSelectionChanged.bind(this));
+        this.eventBus.listen(Event.selection.SELECT, this.handleSelectionChange.bind(this));
+        this.eventBus.listen(Event.selection.UNSELECT, this.handleSelectionChange.bind(this));
         this.eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
-    }
-
-    private handleSelectionChanged(payload: EventPayload) {
-        const selectedCount = 1;
-
-        if (selectedCount === 1) {
-            this.isNodesVisible(true);
-        } else {
-            this.isNodesVisible(false);
-        }
     }
 
     protected setSelected(selected: boolean): void {
@@ -52,8 +45,8 @@ export default class ResizeNode extends EntityBase {
             this.translate(x, y);
     }
 
-    private handleFocus(payload: EventPayload): void {
-        const target = payload.target as EntityBase;
+    private handleSelectionChange(payload: EventPayload): void {
+        const target = payload.target as EntityProps;
 
         this.transform(target.x, target.y, target.width, target.height);
 

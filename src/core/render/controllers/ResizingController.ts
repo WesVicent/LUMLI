@@ -3,6 +3,7 @@ import Controller from "./ControllerBase";
 import { EventBus } from "../EventBus";
 import EventPayload from "../interfaces/EventPayload";
 import Event from "../EventNames";
+import EntityBase from "../entities/EntityBase";
 
 export default class ResizingController extends Controller {
 
@@ -37,11 +38,11 @@ export default class ResizingController extends Controller {
         this.listen(Event.entity.START_RESIZE, this.handleOnResizeStart.bind(this));
         this.listen(Event.entity.RESIZING, this.handleOnResizing.bind(this));
         this.listen(Event.entity.STOP_RESIZE, this.handleOnResizeEnd.bind(this));
-        this.listen(Event.entity.FOCUS, this.handleOnFocus.bind(this));
+        this.listen(Event.entity.CLICK, this.handleOnFocus.bind(this));
     }
 
     private handleOnFocus(payload: EventPayload) {
-        this.refId = payload.target!.id;
+        this.refId = (payload.target as EntityBase)?.id;
         this.refWidth = payload.target!.width;
         this.refHeight = payload.target!.height;
         this.refX = payload.target!.x;
@@ -55,7 +56,7 @@ export default class ResizingController extends Controller {
 
         this.isResizing = true;
 
-        payload.target!.id = this.refId || '';
+        (payload.target as EntityBase)!.id = this.refId || '';
 
         this.resizeDirection = d3.select(event.sourceEvent.target as SVGRectElement)
             .attr('class')

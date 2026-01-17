@@ -1,6 +1,7 @@
 import EntityBase from "../entities/EntityBase";
+import EntityProps from "./EntityProps";
 
-type LumMultiEventTarget = EntityBase;
+type LumMultiEventTarget = EntityBase | EntityProps;
 
 export default class EventPayload {
     public event?: LumMultiDragEvent;

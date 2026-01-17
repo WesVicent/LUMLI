@@ -33,17 +33,19 @@ export default abstract class EntityBase implements Movable, Resizable {
     this.emit(Event.entity.CLICK, new EventPayload(event as D3DragGroupEvent | undefined, this));
   }
 
-  private onSelected(payload: EventPayload) {    
-    if (payload.target?.id === this.id) {
+  private onSelected(payload: EventPayload) {        
+    if ((payload.target as EntityBase)?.id === this.id) {
       this.isSelected = true;
       this.setSelected(true);
     }
   }
 
-  private onUnselected(payload: EventPayload) {
-    if (payload.target?.id === this.id) {
+  private onUnselected(payload: EventPayload) {    
+    
+    if ((payload.target as EntityBase)?.id === this.id) {
       this.isSelected = false;
       this.setSelected(false);
+      console.log(this.isSelected, 'is Selected');
     }
   }
 
@@ -52,16 +54,15 @@ export default abstract class EntityBase implements Movable, Resizable {
     this.setSelected(false);
   }
 
-  // Abstract method for subclasses to implement visual selection
-  protected abstract setSelected(selected: boolean): void;
-
-  public abstract draw(): void;
-
-  abstract translate(x: number, y: number): void;
-
   private emit(event: number, data: any) {
     this.eventBus.trigger(event, { entityId: this.id, ...data });
   }
+  
+  public abstract draw(): void;
+  
+  abstract translate(x: number, y: number): void;
+
+  protected abstract setSelected(selected: boolean): void;
 
   protected emitStartMove(payload: EventPayload) {
     this.emit(Event.entity.START_MOVEMENT, payload);
