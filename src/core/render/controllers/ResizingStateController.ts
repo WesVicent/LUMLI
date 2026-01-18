@@ -1,12 +1,12 @@
 import * as d3 from "d3";
-import Controller from "./Controller";
+import StateController from "../../state/StateController";
 import Entity from "../entities/Entity";
 import { EventBus } from "../../event/EventBus";
 import Event from "../../event/EventNames";
 import EventPayload from "../../event/types/EventPayload";
+import AppState from "../../state/AppState";
 
-export default class ResizingController extends Controller {
-
+export default class ResizingStateController extends StateController {
     private readonly MIN_WIDTH = 40;
     private readonly MIN_HEIGHT = 40;
 
@@ -30,8 +30,8 @@ export default class ResizingController extends Controller {
         bottomRight: 'bottomRight',
     };
 
-    constructor(eventBus: EventBus) {
-        super(eventBus);
+    constructor(eventBus: EventBus, appState: AppState) {
+        super(eventBus, appState);
     }
 
     protected listenToEvents(): void {

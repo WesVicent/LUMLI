@@ -84,7 +84,7 @@ export default class LumCard extends Entity {
 
         if (highlight) {
             color = '#096bc7ff';
-            lineSize = 2;
+            lineSize = 1;
         }
 
         this.rect.attr('stroke-width', lineSize.toString())
@@ -115,9 +115,7 @@ export default class LumCard extends Entity {
 
                 if (this.isSelected) {
                     this.setSelectionVisuals(true);
-                } else {
-                    console.log('notSelected');
-                    
+                } else {                    
                     this.setSelectionVisuals(false);
                 }
 

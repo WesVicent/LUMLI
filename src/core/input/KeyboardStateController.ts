@@ -1,15 +1,15 @@
+import AppState from "../state/AppState";
 import { EventBus } from "../event/EventBus";
-import Event from "../event/EventNames";
-import EventPayload from "../event/types/EventPayload";
+import StateController from "../state/StateController";
 
-export default class KeyboardStateManager {
-    private ctrlPressed: boolean = false;
-    private shiftPressed: boolean = false;
-    private altPressed: boolean = false;
-
-    constructor(private eventBus: EventBus) {
+export default class KeyboardStateController extends StateController{
+    constructor(eventBus: EventBus, appState: AppState) {
+        super(eventBus, appState);
+        
         this.setupListeners();
     }
+
+    protected listenToEvents(): void{}
 
     private setupListeners(): void {
         document.addEventListener('keydown', (event) => {
@@ -33,13 +33,13 @@ export default class KeyboardStateManager {
         switch (event.key) {
             case 'Control':
             case 'Meta':
-                this.ctrlPressed = true;
+                this.appState.keyboard.ctrlPressed = true;
                 break;
             case 'Shift':
-                this.shiftPressed = true;
+                this.appState.keyboard.shiftPressed = true;
                 break;
             case 'Alt':
-                this.altPressed = true;
+                this.appState.keyboard.altPressed = true;
                 break;
 
             default:
@@ -52,14 +52,13 @@ export default class KeyboardStateManager {
         switch (event.key) {
             case 'Control':
             case 'Meta':
-                this.ctrlPressed = false;
-                this.eventBus.trigger(Event.key.CTRL_U, new EventPayload());
+                this.appState.keyboard.ctrlPressed = false;
                 break;
             case 'Shift':
-                this.shiftPressed = false;
+                this.appState.keyboard.shiftPressed = false;
                 break;
             case 'Alt':
-                this.altPressed = false;
+                this.appState.keyboard.altPressed = false;
                 break;
             default:
                 console.log(event.key);
@@ -68,20 +67,20 @@ export default class KeyboardStateManager {
     }
 
     private clearAll() {
-        this.ctrlPressed = false;
-        this.shiftPressed = false;
-        this.altPressed = false;
+        this.appState.keyboard.ctrlPressed = false;
+        this.appState.keyboard.shiftPressed = false;
+        this.appState.keyboard.altPressed = false;
     }
 
     public isCtrlPressed(): boolean {
-        return this.ctrlPressed;
+        return this.appState.keyboard.ctrlPressed;
     }
 
     public isShiftPressed(): boolean {
-        return this.shiftPressed;
+        return this.appState.keyboard.shiftPressed;
     }
 
     public isAltPressed(): boolean {
-        return this.altPressed;
+        return this.appState.keyboard.altPressed;
     }
 }

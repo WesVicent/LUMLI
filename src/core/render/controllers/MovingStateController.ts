@@ -1,14 +1,14 @@
+import AppState from "../../state/AppState";
 import { EventBus } from "../../event/EventBus";
 import Event from "../../event/EventNames";
 import EventPayload from "../../event/types/EventPayload";
 import Entity from "../entities/Entity";
-import Controller from "./Controller";
+import StateController from "../../state/StateController";
 
-export default class MovingController extends Controller {
+export default class MovingStateController extends StateController {
 
-    constructor(eventBus: EventBus) {
-        super(eventBus);
-        console.info('Moving Controller setted up')
+    constructor(eventBus: EventBus, appState: AppState) {
+        super(eventBus, appState);
     }
 
     protected listenToEvents(): void {
