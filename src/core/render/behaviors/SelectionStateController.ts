@@ -1,19 +1,17 @@
-import KeyboardStateManager from "../../input/KeyboardStateManager";
 import Entity from "../entities/Entity";
 import EntityBase from "../entities/types/EntityBase";
 import { EventBus } from "../../event/EventBus";
 import Event from "../../event/EventNames";
 import EventPayload from "../../event/types/EventPayload";
+import StateController from "../../state/StateController";
+import AppState from "../../state/AppState";
 
-export default class SelectionController {
-    private selected: Entity[] = [];
-    private eventBus: EventBus;
-    private inputState: KeyboardStateManager;
-
-    constructor(eventBus: EventBus, inputState: KeyboardStateManager) {
-        this.eventBus = eventBus;
-        this.inputState = inputState;
-
+export default class SelectionStateController extends StateController { 
+    constructor(eventBus: EventBus, appState: AppState) {
+        super(eventBus, appState);
+    }
+   
+    protected listenToEvents(): void {
         this.eventBus.listen(Event.entity.CLICK, this.handleEntityClick.bind(this));
     }
 
@@ -22,8 +20,8 @@ export default class SelectionController {
 
         if (!entity) return;
 
-        if (this.inputState.isCtrlPressed()) {
-            if (this.selected.includes(entity)) {
+        if (this.appState.keyboard.ctrlPressed) {
+            if (this.appState.selectedEntities.includes(entity)) {
                 this.removeFromSelection(entity);
                 return;
             }
@@ -35,24 +33,24 @@ export default class SelectionController {
     }
 
     private removeFromSelection(entity: Entity): void {
-        this.selected = this.selected.filter(e => e.id !== entity.id);
+        this.appState.selectedEntities = this.appState.selectedEntities.filter(e => e.id !== entity.id);
 
-        this.eventBus.trigger(Event.selection.UNSELECT, new EventPayload(undefined, this.calculateBoundaries(entity.id)));
+        this.trigger(Event.selection.UNSELECT, new EventPayload(undefined, this.calculateBoundaries(entity.id)));
     }
 
     private changeSelection(entity: Entity): void {
         this.clearSelection();
-        this.selected[0] = entity;
+        this.appState.selectedEntities[0] = entity;
 
-        this.eventBus.trigger(Event.selection.SELECT, new EventPayload(undefined, entity));
+        this.trigger(Event.selection.SELECT, new EventPayload(undefined, entity));
     }
 
     private addToSelection(entity: Entity): void {
-        if (!this.selected.includes(entity)) {
-            this.selected.push(entity);
+        if (!this.appState.selectedEntities.includes(entity)) {
+            this.appState.selectedEntities.push(entity);
         }
 
-        this.eventBus.trigger(Event.selection.SELECT, new EventPayload(undefined, this.calculateBoundaries(entity.id)));
+        this.trigger(Event.selection.SELECT, new EventPayload(undefined, this.calculateBoundaries(entity.id)));
     }
 
     private calculateBoundaries(id: string): EntityBase {
@@ -61,7 +59,7 @@ export default class SelectionController {
         let maxX = -Infinity;
         let maxY = -Infinity;
 
-        this.selected.forEach(entity => {
+        this.appState.selectedEntities.forEach(entity => {
             const entityRight = entity.x + entity.width;
             const entityBottom = entity.y + entity.height;
 
@@ -71,12 +69,12 @@ export default class SelectionController {
             maxY = Math.max(maxY, entityBottom);
         });
 
-        return  new EntityBase(id, minX, minY, maxX - minX, maxY - minY);
+        return new EntityBase(id, minX, minY, maxX - minX, maxY - minY);
     }
 
     public clearSelection(): void {
-        this.selected.length = 0;
+        this.appState.selectedEntities.length = 0;
 
-        this.eventBus.trigger(Event.selection.CLEAR, new EventPayload());
+        this.trigger(Event.selection.CLEAR, new EventPayload());
     }
 }

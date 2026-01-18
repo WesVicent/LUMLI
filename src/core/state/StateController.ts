@@ -1,10 +1,13 @@
-import { EventBus } from '../../event/EventBus';
-import EventPayload from '../interfaces/EventPayload';
+import AppState from './AppState';
+import { EventBus } from '../event/EventBus';
+import EventPayload from '../event/types/EventPayload';
 
-export default abstract class Controller {
+export default abstract class StateController {
+  protected appState: AppState;
   protected eventBus: EventBus;
 
-  constructor(eventBus: EventBus) {
+  constructor(eventBus: EventBus, appState: AppState) {
+    this.appState = appState;
     this.eventBus = eventBus;
     this.listenToEvents();
   }

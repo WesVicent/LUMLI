@@ -7,7 +7,7 @@ import { EventBus } from "../../../event/EventBus";
 import Event from "../../../event/EventNames";
 import EventPayload from "../../../event/types/EventPayload";
 
-export default class ResizeNode extends Entity {
+export default class BoundaryBox extends Entity {
     private nodes: Array<IdAndPositions>;
 
     private readonly RESIZING_NODES_SIZE: number = 8;
@@ -27,8 +27,6 @@ export default class ResizeNode extends Entity {
 
         this.nodes = this.createNodePositionsArray(x, y, width, height);
 
-        // this.eventBus.listen(Event.entity.FOCUS, this.handleFocus.bind(this));
-        // eventBus.listen(Event.selection.CHANGED, this.handleSelectionChanged.bind(this));
         this.eventBus.listen(Event.selection.SELECT, this.handleSelectionChange.bind(this));
         this.eventBus.listen(Event.selection.UNSELECT, this.handleSelectionChange.bind(this));
         this.eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
@@ -39,9 +37,9 @@ export default class ResizeNode extends Entity {
     }
 
     public transform(x: number, y: number, width: number, height: number): void {
-            this.width = width;
-            this.height = height;
-            this.translate(x, y);
+        this.width = width;
+        this.height = height;
+        this.translate(x, y);
     }
 
     private handleSelectionChange(payload: EventPayload): void {
@@ -88,13 +86,25 @@ export default class ResizeNode extends Entity {
     }
 
     public draw(): void {
+        // Box
+        this.renderService.drawPrimitiveRect(this.x, this.y, this.width, this.height)
+            .attr('id', 'b-box')
+            .attr('visibility', 'hidden')
+            .attr('display', 'none')
+            .attr('stroke', '#096bc7')
+            .attr('fill', 'none')
+            .attr('stroke-width', 2)
+            .style('cursor', 'grab')
+            .style("pointer-events", "all")
+            .lower();
+
+
         this.nodes.forEach(node => {
             this.renderService.drawPrimitiveRect(
                 node.x - this.RESIZING_NODES_SIZE / 2,
                 node.y - this.RESIZING_NODES_SIZE / 2,
                 this.RESIZING_NODES_SIZE,
                 this.RESIZING_NODES_SIZE,
-                // this.card.localGroup
             )
                 .attr('id', 'rsz-node')
                 .attr('class', `handle-resiz resize-${node.id}`)
@@ -113,6 +123,12 @@ export default class ResizeNode extends Entity {
         this.x = x || this.x;
         this.y = y || this.y;
 
+        this.renderService.select<SVGRectElement>('#b-box')
+            .attr('x', this.x)
+            .attr('y', this.y)
+            .attr('width', this.width)
+            .attr('height', this.height);
+
         this.renderService.select<SVGRectElement>('.resize-topLeft').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
         this.renderService.select<SVGRectElement>('.resize-top').attr('x', this.x + (this.width / 2) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
         this.renderService.select<SVGRectElement>('.resize-topRight').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
@@ -123,13 +139,29 @@ export default class ResizeNode extends Entity {
         this.renderService.select<SVGRectElement>('.resize-left').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y + (this.height / 2) - this.RESIZING_NODES_SIZE / 2);
     }
 
-    private isNodesVisible(visible: boolean): void {
+    private isBoxVisible(visible: boolean): void {
+        const box = this.renderService.select<SVGRectElement>('#b-box');        
+
         if (visible) {
-            this.renderService.selectAll('#rsz-node').attr('display', 'block');
+            box.attr('visibility', 'visible')
+                .attr('display', 'block')
+                .lower();
             return;
         }
 
-        this.renderService.selectAll('#rsz-node').attr('display', 'none');
+        box.attr('display', 'none');
+    }
+
+    private isNodesVisible(visible: boolean): void {
+        this.isBoxVisible(visible);
+        const nodes = this.renderService.selectAll('#rsz-node');
+
+        if (visible) {
+            nodes.attr('display', 'block');
+            return;
+        }
+
+        nodes.attr('display', 'none');
     }
 
     private setupDragHandler(): void {

@@ -2,12 +2,13 @@ import * as d3 from 'd3';
 import RenderService from './core/render/engines/d3/RenderService'
 import RenderContext from './core/render/engines/d3/RenderContext';
 import LumCard from './core/render/entities/components/LumCard';
-import ResizingController from './core/render/controllers/ResizingController';
-import MovingController from './core/render/controllers/MovingController';
-import ResizeNode from './core/render/entities/GUI/ResizeNode';
-import SelectionController from './core/render/controllers/SelectionController';
-import KeyboardStateManager from './core/input/KeyboardStateManager';
+import ResizingStateController from './core/render/behaviors/ResizingStateController';
+import MovingStateController from './core/render/behaviors/MovingStateController';
+import BoundaryBox from './core/render/entities/GUI/BoundaryBox';
+import SelectionStateController from './core/render/behaviors/SelectionStateController';
+import KeyboardStateController from './core/input/KeyboardStateController';
 import { EventBus } from './core/event/EventBus';
+import AppState from './core/state/AppState';
 
 class Lum {
     public static init() {
@@ -28,18 +29,20 @@ class Lum {
         const X_POS = renderContext.hCenter - WIDHT / 2;
         const Y_POS = renderContext.vCenter - HEIGHT / 2;
 
-        const keyboardStateManager = new KeyboardStateManager(eventBus);
+        const appState = new AppState();
 
-        new MovingController(eventBus);
-        new ResizingController(eventBus);
-        new SelectionController(eventBus, keyboardStateManager);
+        new KeyboardStateController(eventBus, appState);
+
+        new MovingStateController(eventBus, appState);
+        new ResizingStateController(eventBus, appState);
+        new SelectionStateController(eventBus, appState);
 
         const entities = [
             new LumCard('card-1', X_POS - WIDHT, Y_POS - HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
-            new LumCard('card-2', X_POS + WIDHT, Y_POS + HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
-            new LumCard('card-3', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
+            new LumCard('card-2', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
+            new LumCard('card-3', X_POS + WIDHT, Y_POS + HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
 
-            new ResizeNode('resizing-nodes', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
+            new BoundaryBox('b-box', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
         ];
 
         entities.forEach(entity => {

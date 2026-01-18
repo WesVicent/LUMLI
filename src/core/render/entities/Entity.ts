@@ -46,7 +46,6 @@ export default abstract class Entity extends EntityBase {
     if ((payload.target as Entity)?.id === this.id) {
       this.isSelected = false;
       this.setSelected(false);
-      console.log(this.isSelected, 'is Selected');
     }
   }
 
