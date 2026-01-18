@@ -31,8 +31,10 @@ class Lum {
 
         const appState = new AppState();
 
+        // INPUT
         new KeyboardStateController(eventBus, appState);
 
+        // BEHAVIOR
         new MovingStateController(eventBus, appState);
         new ResizingStateController(eventBus, appState);
         new SelectionStateController(eventBus, appState);
