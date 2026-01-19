@@ -38,7 +38,7 @@ export default class ResizingStateController extends StateController {
         this.listen(Event.entity.START_RESIZE, this.handleOnResizeStart.bind(this));
         this.listen(Event.entity.RESIZING, this.handleOnResizing.bind(this));
         this.listen(Event.entity.STOP_RESIZE, this.handleOnResizeEnd.bind(this));
-        this.listen(Event.entity.CLICK, this.handleOnFocus.bind(this));
+        this.listen(Event.entity.CLICK_DOWN, this.handleOnFocus.bind(this));
     }
 
     private handleOnFocus(payload: EventPayload) {

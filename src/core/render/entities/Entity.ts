@@ -30,8 +30,12 @@ export default abstract class Entity extends EntityBase {
     this.eventBus.listen(Event.selection.CLEAR, this.onSelectionClear.bind(this));
   }
 
-  protected emitClick(event?: LumMultiDragEvent) {
-    this.emit(Event.entity.CLICK, new EventPayload(event as D3DragGroupEvent | undefined, this));
+  protected emitClickUp(event?: LumMultiDragEvent) {
+    this.emit(Event.entity.CLICK_UP, new EventPayload(event as D3DragGroupEvent | undefined, this));
+  }  
+  
+  protected emitClickDown(event?: LumMultiDragEvent) {
+    this.emit(Event.entity.CLICK_DOWN, new EventPayload(event as D3DragGroupEvent | undefined, this));
   }
 
   private onSelected(payload: EventPayload) {        

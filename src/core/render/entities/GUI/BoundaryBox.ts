@@ -57,6 +57,13 @@ export default class BoundaryBox extends Entity {
         this.translate(target.x, target.y);
     }
 
+    private handleStopMoving(payload: EventPayload) {
+
+        this.isSelected
+
+        this.isNodesVisible(false);
+    }
+
     private createNodePositionsArray(x: number, y: number, width: number, height: number): Array<IdAndPositions> {
         return [
             { id: this.RESIZING_NODES_CLASS_SULFIX.topLeft, x: x, y: y },
@@ -153,6 +160,8 @@ export default class BoundaryBox extends Entity {
     }
 
     private isNodesVisible(visible: boolean): void {
+        console.log('nodes', visible);
+        
         this.isBoxVisible(visible);
         const nodes = this.renderService.selectAll('#rsz-node');
 

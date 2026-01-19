@@ -19,7 +19,9 @@ class Lum {
         const contextWidth = element?.clientWidth || 100;
         const contextHeight = element?.clientHeight || 100;
 
+        const appState = new AppState();
         const eventBus = new EventBus();
+
         const renderContext = new RenderContext(svg, contextWidth, contextHeight);
         const renderService: RenderService = new RenderService(renderContext);
 
@@ -28,8 +30,6 @@ class Lum {
 
         const X_POS = renderContext.hCenter - WIDHT / 2;
         const Y_POS = renderContext.vCenter - HEIGHT / 2;
-
-        const appState = new AppState();
 
         // INPUT
         new KeyboardStateController(eventBus, appState);
@@ -44,7 +44,7 @@ class Lum {
             new LumCard('card-2', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
             new LumCard('card-3', X_POS + WIDHT, Y_POS + HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
 
-            new BoundaryBox('b-box', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
+            new BoundaryBox('b-box', 0, 0, 0, 0, renderService, eventBus),
         ];
 
         entities.forEach(entity => {

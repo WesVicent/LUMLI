@@ -12,7 +12,7 @@ export default class SelectionStateController extends StateController {
     }
    
     protected listenToEvents(): void {
-        this.eventBus.listen(Event.entity.CLICK, this.handleEntityClick.bind(this));
+        this.eventBus.listen(Event.entity.CLICK_DOWN, this.handleEntityClick.bind(this));
     }
 
     private handleEntityClick(payload: EventPayload) {

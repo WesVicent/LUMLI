@@ -104,6 +104,8 @@ export default class LumCard extends Entity {
                 return true; // Allow all events
             })
             .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
+                this.emitClickDown(event);
+                
                 this.setSelectionVisuals(true);
                 this.emitStartMove(new EventPayload(event, this));
             })
@@ -111,8 +113,8 @@ export default class LumCard extends Entity {
                 this.emitMoving(new EventPayload(event, this));
             })
             .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.emitClick(event);
-
+                this.emitClickUp(event);
+                
                 if (this.isSelected) {
                     this.setSelectionVisuals(true);
                 } else {                    
