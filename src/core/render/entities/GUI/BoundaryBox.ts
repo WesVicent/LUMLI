@@ -30,6 +30,7 @@ export default class BoundaryBox extends Entity {
         this.eventBus.listen(Event.selection.SELECT, this.handleSelectionChange.bind(this));
         this.eventBus.listen(Event.selection.UNSELECT, this.handleSelectionChange.bind(this));
         this.eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
+        this.eventBus.listen(Event.entity.STOP_MOVEMENT, this.handleStopMoving.bind(this));
     }
 
     protected setSelected(selected: boolean): void {
@@ -57,11 +58,8 @@ export default class BoundaryBox extends Entity {
         this.translate(target.x, target.y);
     }
 
-    private handleStopMoving(payload: EventPayload) {
-
-        this.isSelected
-
-        this.isNodesVisible(false);
+    private handleStopMoving() {
+        this.isNodesVisible(true);
     }
 
     private createNodePositionsArray(x: number, y: number, width: number, height: number): Array<IdAndPositions> {
@@ -159,9 +157,7 @@ export default class BoundaryBox extends Entity {
         box.attr('display', 'none');
     }
 
-    private isNodesVisible(visible: boolean): void {
-        console.log('nodes', visible);
-        
+    private isNodesVisible(visible: boolean): void {    
         this.isBoxVisible(visible);
         const nodes = this.renderService.selectAll('#rsz-node');
 

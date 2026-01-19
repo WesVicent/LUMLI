@@ -6,13 +6,13 @@ import EventPayload from "../../event/types/EventPayload";
 import StateController from "../../state/StateController";
 import AppState from "../../state/AppState";
 
-export default class SelectionStateController extends StateController { 
+export default class SelectionStateController extends StateController {
     constructor(eventBus: EventBus, appState: AppState) {
         super(eventBus, appState);
     }
-   
+
     protected listenToEvents(): void {
-        this.eventBus.listen(Event.entity.CLICK_DOWN, this.handleEntityClick.bind(this));
+        this.eventBus.listen(Event.entity.CLICK_UP, this.handleEntityClick.bind(this));
     }
 
     private handleEntityClick(payload: EventPayload) {

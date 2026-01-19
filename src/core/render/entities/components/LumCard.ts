@@ -94,19 +94,15 @@ export default class LumCard extends Entity {
             .style("stroke", color);
     }
 
-    protected setSelectionVisuals(selected: boolean): void {
-        this.highlightBorders(selected);
-    }
-
     private setupDragHandler(): void {
         const dragHandler = d3.drag<SVGGElement, unknown, void>()
             .filter(() => {
                 return true; // Allow all events
             })
-            .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
+            .clickDistance(500)
+            .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {       
                 this.emitClickDown(event);
                 
-                this.setSelectionVisuals(true);
                 this.emitStartMove(new EventPayload(event, this));
             })
             .on('drag', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
@@ -114,12 +110,6 @@ export default class LumCard extends Entity {
             })
             .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
                 this.emitClickUp(event);
-                
-                if (this.isSelected) {
-                    this.setSelectionVisuals(true);
-                } else {                    
-                    this.setSelectionVisuals(false);
-                }
 
                 this.emitStopMove(new EventPayload(event, this));
             });
