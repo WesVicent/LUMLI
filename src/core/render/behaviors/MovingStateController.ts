@@ -25,22 +25,30 @@ export default class MovingStateController extends StateController {
 
     private updateEntityPositions(payload: EventPayload) {
         const event = payload.event!;
-        
-        if (this.appState.selectedEntities.length > 1) {
+
+        // If no entity was clicked yet, or clicked entity isn't selected.
+        if (!this.appState.selectedEntities.includes(payload.target as Entity) || this.appState.selectedEntities.length === 0) {
+            this.eventBus.trigger(Event.selection.CLEAR);
+            this.eventBus.trigger(Event.selection.SELECT, payload);
+            
+            let entity = payload.target! as Entity;
+            entity.x += event.dx;
+            entity.y += event.dy;
+
+            entity.translate(entity.x, entity.y);
+
+            return;
+        }
+
+        if (this.appState.selectedEntities.includes(payload.target as Entity)) {
             this.appState.selectedEntities.forEach(entity => {
                 entity.x += event.dx;
                 entity.y += event.dy;
 
                 entity.translate(entity.x, entity.y);
             });
-        } else {
-            this.eventBus.trigger(Event.selection.CLEAR);
-            this.eventBus.trigger(Event.selection.SELECT, payload);
-            let entity = payload.target! as Entity; // If current clicked entity isn't selected yet.
-            entity.x += event.dx;
-            entity.y += event.dy;
 
-            entity.translate(entity.x, entity.y);
+            return;
         }
     }
 }

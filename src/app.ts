@@ -9,6 +9,7 @@ import SelectionStateController from './core/render/behaviors/SelectionStateCont
 import KeyboardStateController from './core/input/KeyboardStateController';
 import { EventBus } from './core/event/EventBus';
 import AppState from './core/state/AppState';
+import Context from './core/app/Context';
 
 class Lum {
     public static init() {
@@ -20,6 +21,7 @@ class Lum {
         const contextHeight = element?.clientHeight || 100;
 
         const appState = new AppState();
+        const appContext = new Context(appState);
         const eventBus = new EventBus();
 
         const renderContext = new RenderContext(svg, contextWidth, contextHeight);
@@ -40,11 +42,11 @@ class Lum {
         new SelectionStateController(eventBus, appState);
 
         const entities = [
-            new LumCard('card-1', X_POS - WIDHT, Y_POS - HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
-            new LumCard('card-2', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
-            new LumCard('card-3', X_POS + WIDHT, Y_POS + HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
+            new LumCard(appContext, 'card-1', X_POS - WIDHT, Y_POS - HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
+            new LumCard(appContext, 'card-2', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
+            new LumCard(appContext, 'card-3', X_POS + WIDHT, Y_POS + HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
 
-            new BoundaryBox('b-box', 0, 0, 0, 0, renderService, eventBus),
+            new BoundaryBox(appContext, 'b-box', 0, 0, 0, 0, renderService, eventBus),
         ];
 
         entities.forEach(entity => {

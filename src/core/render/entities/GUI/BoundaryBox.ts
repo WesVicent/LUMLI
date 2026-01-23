@@ -6,6 +6,7 @@ import EntityBase from "../types/EntityBase";
 import { EventBus } from "../../../event/EventBus";
 import Event from "../../../event/EventNames";
 import EventPayload from "../../../event/types/EventPayload";
+import Context from "../../../app/Context";
 
 export default class BoundaryBox extends Entity {
     private nodes: Array<IdAndPositions>;
@@ -22,8 +23,8 @@ export default class BoundaryBox extends Entity {
         left: 'left',
     };
 
-    constructor(id: string, x: number, y: number, width: number, height: number, renderService: RenderService, eventBus: EventBus) {
-        super(id, x, y, width, height, eventBus, renderService);
+    constructor(context: Context, id: string, x: number, y: number, width: number, height: number, renderService: RenderService, eventBus: EventBus) {
+        super(context, id, x, y, width, height, eventBus, renderService);
 
         this.nodes = this.createNodePositionsArray(x, y, width, height);
 
@@ -51,11 +52,32 @@ export default class BoundaryBox extends Entity {
         this.isNodesVisible(true);
     }
 
+    private findAnchorSelection(): { x: number; y: number } {
+        const selected = this.context.selected();
+
+        let mostLeft = selected[0];
+        let mostTop = selected[0];
+
+        for (let i = 1; i < selected.length; i++) {
+            const entity = selected[i];
+            if (entity.x < mostLeft.x) mostLeft = entity;
+            if (entity.y < mostTop.y) mostTop = entity;
+        }
+
+        return { x: mostLeft.x, y: mostTop.y };
+    }
+
     private handleMoving(payload: EventPayload) {
         const target = payload.target! as Entity;
 
+        let anchorPoint = { x: target.x, y: target.y };
+
+        if (this.context.selected().length > 1) {
+            anchorPoint = this.findAnchorSelection();
+        }
+
         this.isNodesVisible(false);
-        this.translate(target.x, target.y);
+        this.translate(anchorPoint.x, anchorPoint.y);
     }
 
     private handleStopMoving() {
@@ -145,7 +167,7 @@ export default class BoundaryBox extends Entity {
     }
 
     private isBoxVisible(visible: boolean): void {
-        const box = this.renderService.select<SVGRectElement>('#b-box');        
+        const box = this.renderService.select<SVGRectElement>('#b-box');
 
         if (visible) {
             box.attr('visibility', 'visible')
@@ -157,7 +179,7 @@ export default class BoundaryBox extends Entity {
         box.attr('display', 'none');
     }
 
-    private isNodesVisible(visible: boolean): void {    
+    private isNodesVisible(visible: boolean): void {
         this.isBoxVisible(visible);
         const nodes = this.renderService.selectAll('#rsz-node');
 

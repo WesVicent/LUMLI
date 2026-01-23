@@ -28,7 +28,9 @@ export default class SelectionStateController extends StateController {
 
             this.addToSelection(entity);
         } else {
-            this.changeSelection(entity);
+            if (!this.appState.selectedEntities.includes(entity)) {
+                this.changeSelection(entity);
+            }
         }
     }
 

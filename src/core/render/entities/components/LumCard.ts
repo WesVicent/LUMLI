@@ -6,6 +6,7 @@ import Entity from "../Entity";
 import Event from "../../../event/EventNames";
 import { EventBus } from "../../../event/EventBus";
 import EventPayload from "../../../event/types/EventPayload";
+import Context from "../../../app/Context";
 
 export default class LumCard extends Entity {
     public localGroup!: D3GElementSelection;
@@ -18,8 +19,8 @@ export default class LumCard extends Entity {
     private readonly MIN_WIDTH = 40;
     private readonly MIN_HEIGHT = 40;
 
-    constructor(id: string, x: number, y: number, width: number, height: number, renderService: RenderService, eventBus: EventBus) {
-        super(id, x, y, width, height, eventBus, renderService);
+    constructor(context: Context, id: string, x: number, y: number, width: number, height: number, renderService: RenderService, eventBus: EventBus) {
+        super(context, id, x, y, width, height, eventBus, renderService);
 
         width = width < this.MIN_WIDTH ? this.MIN_WIDTH : width;
         height = height < this.MIN_HEIGHT ? this.MIN_HEIGHT : height;
@@ -99,7 +100,7 @@ export default class LumCard extends Entity {
             .filter(() => {
                 return true; // Allow all events
             })
-            .clickDistance(500)
+            .clickDistance(3)
             .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {       
                 this.emitClickDown(event);
                 

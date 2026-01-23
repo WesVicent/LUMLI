@@ -1,3 +1,4 @@
+import Context from '../../app/Context';
 import { EventBus } from '../../event/EventBus';
 import Event from '../../event/EventNames';
 import EventPayload from '../../event/types/EventPayload';
@@ -5,18 +6,22 @@ import RenderService from '../engines/d3/RenderService';
 import EntityBase from './types/EntityBase';
 
 export default abstract class Entity extends EntityBase {
+  protected context: Context;
   protected eventBus: EventBus;
-  public renderService: RenderService;
+  
+  protected isSelected: boolean = false;
+
+  public renderService: RenderService; // Should e public?
   public id: string;
   public x: number;
   public y: number;
   public width: number;
   public height: number;
-  protected isSelected: boolean = false;
 
-  constructor(id: string, x: number, y: number, width: number, height: number, eventBus: EventBus, renderService: RenderService) {
+  constructor(context: Context, id: string, x: number, y: number, width: number, height: number, eventBus: EventBus, renderService: RenderService) {
     super(id, x, y, width, height);
 
+    this.context = context;
     this.eventBus = eventBus;
     this.renderService = renderService;
     this.id = id;
