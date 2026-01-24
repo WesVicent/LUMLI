@@ -3,7 +3,7 @@ import RenderService from "../../engines/d3/RenderService";
 // import LumText from "./LumText";
 import EntityBase from "../types/EntityBase";
 import Entity from "../Entity";
-import Event from "../../../event/EventNames";
+import { Event } from "../../../event/EventNames";
 import { EventBus } from "../../../event/EventBus";
 import EventPayload from "../../../event/types/EventPayload";
 import Context from "../../../app/Context";
@@ -14,6 +14,9 @@ export default class LumCard extends Entity {
     private rect!: D3RectElementSelection;
     private line!: D3LineElementSelection;
     // private text: LumText;
+
+    private dragStartPos!: { x: number, y: number };
+    private isDragging = false;
 
     // Resizing
     private readonly MIN_WIDTH = 40;
@@ -75,7 +78,7 @@ export default class LumCard extends Entity {
     }
 
     public getPositionAndSize(): EntityBase {
-        return new EntityBase (this.id, this.x, this.y, this.width, this.height);
+        return new EntityBase(this.id, this.x, this.y, this.width, this.height);
     }
 
     public highlightBorders(highlight: boolean): void {
@@ -100,19 +103,34 @@ export default class LumCard extends Entity {
             .filter(() => {
                 return true; // Allow all events
             })
-            .clickDistance(3)
-            .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {       
+            .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
+                this.dragStartPos = { x: event.x, y: event.y };
+
                 this.emitClickDown(event);
-                
-                this.emitStartMove(new EventPayload(event, this));
             })
             .on('drag', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.emitMoving(new EventPayload(event, this));
+
+                const dx = Math.abs(event.x - this.dragStartPos.x);
+                const dy = Math.abs(event.y - this.dragStartPos.y);
+
+                // Wait 5 pixels before start drag.
+                if (!this.isDragging && (dx > 5 || dy > 5)) {
+                    this.isDragging = true;
+                    this.emitStartMove(new EventPayload(event, this));
+                }
+
+                if (this.isDragging) {
+                    this.emitMoving(new EventPayload(event, this));
+                }
             })
             .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
-                this.emitClickUp(event);
+                if (this.isDragging) {
+                    this.emitStopMove(new EventPayload(event, this));
+                } 
 
-                this.emitStopMove(new EventPayload(event, this));
+                this.emitClickUp(event);
+                this.dragStartPos = undefined as any;
+                this.isDragging = false;
             });
 
         this.localGroup

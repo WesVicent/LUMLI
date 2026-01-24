@@ -4,7 +4,7 @@ import IdAndPositions from "../interfaces/IdAndPositions";
 import Entity from "../Entity";
 import EntityBase from "../types/EntityBase";
 import { EventBus } from "../../../event/EventBus";
-import Event from "../../../event/EventNames";
+import { Event } from "../../../event/EventNames";
 import EventPayload from "../../../event/types/EventPayload";
 import Context from "../../../app/Context";
 
@@ -47,9 +47,12 @@ export default class BoundaryBox extends Entity {
     private handleSelectionChange(payload: EventPayload): void {
         const target = payload.target as EntityBase;
 
-        this.transform(target.x, target.y, target.width, target.height);
-
-        this.isNodesVisible(true);
+        if (target) {
+            this.transform(target.x, target.y, target.width, target.height);
+            this.isNodesVisible(true);
+        } else { // Unselect all was triggered.
+            this.isNodesVisible(false);
+        }
     }
 
     private findAnchorSelection(): { x: number; y: number } {

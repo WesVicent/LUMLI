@@ -1,4 +1,4 @@
-export default class Event {
+export class Event {
     public static readonly entity = {
         START_MOVEMENT: 0,
         MOVING: 1,
@@ -16,5 +16,9 @@ export default class Event {
         UNSELECT: 111,
         CHANGED: 112,
         CLEAR: 113
+    };
+
+    public static readonly global = {
+        CONTAINER_CLICK: 220,
     };
 }

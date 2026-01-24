@@ -10,6 +10,7 @@ import KeyboardStateController from './core/input/KeyboardStateController';
 import { EventBus } from './core/event/EventBus';
 import AppState from './core/state/AppState';
 import Context from './core/app/Context';
+import MouseStateController from './core/input/MouseStateController';
 
 class Lum {
     public static init() {
@@ -35,6 +36,7 @@ class Lum {
 
         // INPUT
         new KeyboardStateController(eventBus, appState);
+        new MouseStateController(eventBus, appState);
 
         // BEHAVIOR
         new MovingStateController(eventBus, appState);

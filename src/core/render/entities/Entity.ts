@@ -1,6 +1,6 @@
 import Context from '../../app/Context';
 import { EventBus } from '../../event/EventBus';
-import Event from '../../event/EventNames';
+import { Event } from '../../event/EventNames';
 import EventPayload from '../../event/types/EventPayload';
 import RenderService from '../engines/d3/RenderService';
 import EntityBase from './types/EntityBase';
@@ -44,6 +44,7 @@ export default abstract class Entity extends EntityBase {
   }
 
   private onSelected(payload: EventPayload) {        
+     
     if ((payload.target as Entity)?.id === this.id) {
       this.isSelected = true;
       this.setSelected(true);
@@ -58,7 +59,7 @@ export default abstract class Entity extends EntityBase {
     }
   }
 
-  private onSelectionClear() {
+  private onSelectionClear() {    
     this.isSelected = false;
     this.setSelected(false);
   }

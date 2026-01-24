@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import StateController from "../../state/StateController";
 import Entity from "../entities/Entity";
 import { EventBus } from "../../event/EventBus";
-import Event from "../../event/EventNames";
+import {Event} from "../../event/EventNames";
 import EventPayload from "../../event/types/EventPayload";
 import AppState from "../../state/AppState";
 

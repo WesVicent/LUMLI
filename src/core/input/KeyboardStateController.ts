@@ -2,14 +2,14 @@ import AppState from "../state/AppState";
 import { EventBus } from "../event/EventBus";
 import StateController from "../state/StateController";
 
-export default class KeyboardStateController extends StateController{
+export default class KeyboardStateController extends StateController {
     constructor(eventBus: EventBus, appState: AppState) {
         super(eventBus, appState);
-        
+
         this.setupListeners();
     }
 
-    protected listenToEvents(): void{}
+    protected listenToEvents(): void { }
 
     private setupListeners(): void {
         document.addEventListener('keydown', (event) => {

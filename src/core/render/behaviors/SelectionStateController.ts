@@ -1,7 +1,7 @@
 import Entity from "../entities/Entity";
 import EntityBase from "../entities/types/EntityBase";
 import { EventBus } from "../../event/EventBus";
-import Event from "../../event/EventNames";
+import { Event } from "../../event/EventNames";
 import EventPayload from "../../event/types/EventPayload";
 import StateController from "../../state/StateController";
 import AppState from "../../state/AppState";
@@ -13,6 +13,7 @@ export default class SelectionStateController extends StateController {
 
     protected listenToEvents(): void {
         this.eventBus.listen(Event.entity.CLICK_UP, this.handleEntityClick.bind(this));
+        this.eventBus.listen(Event.global.CONTAINER_CLICK, this.handleContainerClick.bind(this));
     }
 
     private handleEntityClick(payload: EventPayload) {
@@ -21,8 +22,8 @@ export default class SelectionStateController extends StateController {
         if (!entity) return;
 
         if (this.appState.keyboard.ctrlPressed) {
-            if (this.appState.selectedEntities.includes(entity)) {
-                this.removeFromSelection(entity);
+            if (this.appState.selectedEntities.includes(entity) && this.appState.selectedEntities.length > 1) {
+                this.removeFromSelection(payload);
                 return;
             }
 
@@ -34,10 +35,15 @@ export default class SelectionStateController extends StateController {
         }
     }
 
-    private removeFromSelection(entity: Entity): void {
-        this.appState.selectedEntities = this.appState.selectedEntities.filter(e => e.id !== entity.id);
+    private handleContainerClick () {
+        this.clearSelection();
+        this.trigger(Event.selection.UNSELECT, new EventPayload());
+    }
 
-        this.trigger(Event.selection.UNSELECT, new EventPayload(undefined, this.calculateBoundaries(entity.id)));
+    private removeFromSelection(payload: EventPayload): void {
+        this.appState.selectedEntities = this.appState.selectedEntities.filter(e => e.id !== (payload?.target as Entity).id);
+
+        this.trigger(Event.selection.UNSELECT, new EventPayload(undefined, this.calculateBoundaries((payload?.target as Entity).id)));
     }
 
     private changeSelection(entity: Entity): void {
