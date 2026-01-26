@@ -6,16 +6,32 @@ import { Event } from "../../event/EventNames";
 import EventPayload from "../../event/types/EventPayload";
 import AppState from "../../state/AppState";
 
+interface EntityInitialState { // Remove from here
+    id: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+
+    relativeX: number;
+    relativeY: number;
+}
+
+interface BoundaryBox { // Remove from here
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    right: number;
+    bottom: number;
+}
+
 export default class ResizingStateController extends StateController {
     private readonly MIN_WIDTH = 40;
     private readonly MIN_HEIGHT = 40;
 
-    private refId: string | undefined;
-    private refWidth = 0;
-    private refHeight = 0;
-    private refX = 0;
-    private refY = 0;
-
+    private initialEntityStates: Map<string, EntityInitialState> = new Map();
+    private initialBoundaryBox: BoundaryBox | null = null;
     private isResizing = false;
     private resizeDirection: string | null = null;
 
@@ -38,140 +54,224 @@ export default class ResizingStateController extends StateController {
         this.listen(Event.entity.START_RESIZE, this.handleOnResizeStart.bind(this));
         this.listen(Event.entity.RESIZING, this.handleOnResizing.bind(this));
         this.listen(Event.entity.STOP_RESIZE, this.handleOnResizeEnd.bind(this));
-        this.listen(Event.entity.CLICK_DOWN, this.handleOnFocus.bind(this));
-    }
-
-    private handleOnFocus(payload: EventPayload) {
-        this.refId = (payload.target as Entity)?.id;
-        this.refWidth = payload.target!.width;
-        this.refHeight = payload.target!.height;
-        this.refX = payload.target!.x;
-        this.refY = payload.target!.y;
     }
 
     private handleOnResizeStart(payload: EventPayload) {
         const event = payload.event!;
-
         event.sourceEvent.stopPropagation();
-
         this.isResizing = true;
-
-        (payload.target as Entity)!.id = this.refId || '';
 
         this.resizeDirection = d3.select(event.sourceEvent.target as SVGRectElement)
             .attr('class')
             .split(' ')
             .find(className => className.startsWith('resize-'))
             ?.replace('resize-', '') || null;
+
+        this.storeInitialStates();
+    }
+
+    private storeInitialStates(): void { // Move to SelectionStateController
+        const selected = this.appState.selectedEntities;
+        this.initialEntityStates.clear();
+
+        let minX = Infinity, maxX = -Infinity;
+        let minY = Infinity, maxY = -Infinity;
+
+        selected.forEach(entity => {
+            minX = Math.min(minX, entity.x);
+            maxX = Math.max(maxX, entity.x + entity.width);
+            minY = Math.min(minY, entity.y);
+            maxY = Math.max(maxY, entity.y + entity.height);
+        });
+
+        this.initialBoundaryBox = {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY,
+            right: maxX,
+            bottom: maxY
+        };
+
+        selected.forEach(entity => {
+            const relativeX = entity.x - this.initialBoundaryBox!.x;
+            const relativeY = entity.y - this.initialBoundaryBox!.y;
+
+            this.initialEntityStates.set(entity.id, {
+                id: entity.id,
+                x: entity.x,
+                y: entity.y,
+                width: entity.width,
+                height: entity.height,
+                relativeX: relativeX,
+                relativeY: relativeY
+            });
+        });
     }
 
     private handleOnResizing(payload: EventPayload) {
         if (!this.isResizing || !this.resizeDirection) return;
 
-        // switch (this.resizeDirection) {
-        //     case this.RESIZING_NODES_CLASS_SULFIX.right:
-        //         this.resizeRight(payload);
+        this.handleResize(payload);
+    }
 
-        //         break;
-        //     case this.RESIZING_NODES_CLASS_SULFIX.left:
-        //         this.resizeLeft(payload);
+    private handleResize(payload: EventPayload) {
+        if (!this.initialBoundaryBox) return;
 
-        //         break;
-        //     case this.RESIZING_NODES_CLASS_SULFIX.bottom:
-        //         this.resizeBottom(payload);
+        const selected = this.appState.selectedEntities;
 
-        //         break;
-        //     case this.RESIZING_NODES_CLASS_SULFIX.top:
-        //         this.resizeTop(payload);
+        switch (this.resizeDirection) {
+            case this.RESIZING_NODES_CLASS_SULFIX.right:
+                this.resizeRight(payload, selected);
+                break;
+            case this.RESIZING_NODES_CLASS_SULFIX.left:
+                this.resizeLeft(payload, selected);
+                break;
+            case this.RESIZING_NODES_CLASS_SULFIX.bottom:
+                this.resizeBottom(payload, selected);
+                break;
+            case this.RESIZING_NODES_CLASS_SULFIX.top:
+                this.resizeTop(payload, selected);
+                break;
+            case this.RESIZING_NODES_CLASS_SULFIX.topRight:
+                this.resizeTop(payload, selected);
+                this.resizeRight(payload, selected);
+                break;
+            case this.RESIZING_NODES_CLASS_SULFIX.topLeft:
+                this.resizeTop(payload, selected);
+                this.resizeLeft(payload, selected);
+                break;
+            case this.RESIZING_NODES_CLASS_SULFIX.bottomLeft:
+                this.resizeBottom(payload, selected);
+                this.resizeLeft(payload, selected);
+                break;
+            case this.RESIZING_NODES_CLASS_SULFIX.bottomRight:
+                this.resizeBottom(payload, selected);
+                this.resizeRight(payload, selected);
+                break;
+        }
 
-        //         break;
-        //     case this.RESIZING_NODES_CLASS_SULFIX.topRight:
-        //         this.resizeTop(payload);
-        //         this.resizeRight(payload);
+        this.updateEntities();
+        this.updateBoundaryBox(payload.target as Entity);
+    }
 
-        //         break;
-        //     case this.RESIZING_NODES_CLASS_SULFIX.topLeft:
-        //         this.resizeTop(payload);
-        //         this.resizeLeft(payload);
-
-        //         break;
-        //     case this.RESIZING_NODES_CLASS_SULFIX.bottomLeft:
-        //         this.resizeBottom(payload);
-        //         this.resizeLeft(payload);
-
-        //         break;
-        //     case this.RESIZING_NODES_CLASS_SULFIX.bottomRight:
-        //         this.resizeBottom(payload);
-        //         this.resizeRight(payload);
-
-        //         break;
-        // }
-
-        this.appState.selectedEntities.forEach((entity: Entity) => {
-
-            this.refId = entity.id;
-            this.refWidth = entity.width;
-            this.refHeight = entity.height;
-            this.refX = entity.x;
-            this.refY = entity.y;
-
-            if (this.refX + this.refWidth > this.MIN_WIDTH) {
-                entity.width = Math.max(this.MIN_WIDTH, payload.event!.x - this.refX);
-                this.refWidth = entity.width;
-            }
-
+    private updateEntities(): void {
+        this.appState.selectedEntities.forEach(entity => {
             entity.transform(entity.x, entity.y, entity.width, entity.height);
         });
+    }
+
+    private updateBoundaryBox(boundaryBox: Entity): void {
+        const selected = this.appState.selectedEntities;
+        if (selected.length === 0) return;
+
+        let maxX = -Infinity;
+        let minX = Infinity;
+
+        let maxY = -Infinity;
+        let minY = Infinity;
+
+        selected.forEach(entity => {
+            maxX = Math.max(maxX, entity.x + entity.width);
+            minX = Math.min(minX, entity.x);
+            maxY = Math.max(maxY, entity.y + entity.height);
+            minY = Math.min(minY, entity.y);
+        });
+
+        boundaryBox.x = minX;
+        boundaryBox.y = minY;
+        boundaryBox.width = Math.max(this.MIN_WIDTH * selected.length, maxX - minX);
+        boundaryBox.height = Math.max(this.MIN_HEIGHT * selected.length, maxY - minY);
+
+        boundaryBox.transform(boundaryBox.x, boundaryBox.y, boundaryBox.width, boundaryBox.height);
+    }
+
+    private resizeRight(payload: EventPayload, selected: Entity[]): void {
+        if (!this.initialBoundaryBox) return;
+
+        const deltaX = payload.event!.x - this.initialBoundaryBox.right;
+        const scaleX = 1 + (deltaX / this.initialBoundaryBox.width);
+
+        selected.forEach(entity => {
+            const initialState = this.initialEntityStates.get(entity.id);
+            if (!initialState) return;
+
+            if(initialState.width * scaleX >= this.MIN_WIDTH) { 
+                entity.x = this.initialBoundaryBox!.x + (initialState.relativeX * scaleX);
+                entity.width = Math.max(this.MIN_WIDTH, initialState.width * scaleX);
+            }
+        });
+    }
+
+    private resizeLeft(payload: EventPayload, selected: Entity[]): void {
+        if (!this.initialBoundaryBox) return;
+
+        const deltaX = payload.event!.x - this.initialBoundaryBox.x;
+        const scaleX = 1 - (deltaX / this.initialBoundaryBox.width);
+
+        selected.forEach(entity => {
+            const initialState = this.initialEntityStates.get(entity.id);
+            if (!initialState) return;
+
+            if(initialState.width * scaleX >= this.MIN_WIDTH) {
+                const newLeftEdge = this.initialBoundaryBox!.x + deltaX;
+                const offsetFromLeft = initialState.x - this.initialBoundaryBox!.x;
+    
+                entity.x = newLeftEdge + (offsetFromLeft * scaleX);
+                entity.width = Math.max(this.MIN_WIDTH, initialState.width * scaleX);
+            }
+        });
+    }
+
+    private resizeBottom(payload: EventPayload, selected: Entity[]): void {
+        if (!this.initialBoundaryBox) return;
+
+        const deltaY = payload.event!.y - this.initialBoundaryBox.bottom;
+        const scaleY = 1 + (deltaY / this.initialBoundaryBox.height);
+
+        selected.forEach(entity => {
+            const initialState = this.initialEntityStates.get(entity.id);
+            if (!initialState) return;
+
+            if(initialState.height * scaleY >= this.MIN_WIDTH) {
+                entity.y = this.initialBoundaryBox!.y + (initialState.relativeY * scaleY);
+                entity.height = Math.max(this.MIN_HEIGHT, initialState.height * scaleY);
+            }
+
+        });
+
+    }
+
+    private resizeTop(payload: EventPayload, selected: Entity[]): void {
+        if (!this.initialBoundaryBox) return;
+
+        const deltaY = payload.event!.y - this.initialBoundaryBox.y;
+        const scaleY = 1 - (deltaY / this.initialBoundaryBox.height);
+
+        selected.forEach(entity => {
+            const initialState = this.initialEntityStates.get(entity.id);
+            if (!initialState) return;
+
+            if(initialState.height * scaleY >= this.MIN_WIDTH) {
+                const newTopEdge = this.initialBoundaryBox!.y + deltaY;
+                const offsetFromTop = initialState.y - this.initialBoundaryBox!.y;
+    
+                entity.y = newTopEdge + (offsetFromTop * scaleY);
+                entity.height = Math.max(this.MIN_HEIGHT, initialState.height * scaleY);
+            }
+        });
+
     }
 
     private handleOnResizeEnd(payload: EventPayload) {
         this.isResizing = false;
         this.resizeDirection = null;
-        payload.target!.x += payload.event!.dx;
-        payload.target!.y += payload.event!.dy;
-    }
+        this.initialBoundaryBox = null;
+        this.initialEntityStates.clear();
 
-    private resizeTop(payload: EventPayload): void {
-        const newHeight = this.refHeight - (payload.event!.y - this.refY);
-
-        if (newHeight >= this.MIN_HEIGHT) {
-            payload.target!.y = payload.event!.y;
-            payload.target!.height = newHeight;
-        } else {
-            payload.target!.y = this.refY + (this.refHeight - this.MIN_HEIGHT);
-            payload.target!.height = this.MIN_HEIGHT;
+        if (payload.target) {
+            payload.target!.x += payload.event!.dx;
+            payload.target!.y += payload.event!.dy;
         }
-
-        this.refHeight = payload.target!.height;
-        this.refY = payload.target!.y;
-    }
-
-    private resizeRight(payload: EventPayload): void {
-        if (this.refX + this.refWidth > this.MIN_WIDTH) {
-            payload.target!.width = Math.max(this.MIN_WIDTH, payload.event!.x - this.refX);
-            this.refWidth = payload.target!.width;
-        }
-    }
-
-    private resizeBottom(payload: EventPayload): void {
-        if (this.refY + this.refHeight > this.MIN_HEIGHT) {
-            payload.target!.height = Math.max(this.MIN_HEIGHT, payload.event!.y - this.refY);
-            this.refHeight = payload.target!.height;
-        }
-    }
-
-    private resizeLeft(payload: EventPayload): void {
-        const newWidth = this.refWidth - (payload.event!.x - this.refX);
-
-        if (newWidth >= this.MIN_WIDTH) {
-            payload.target!.x = payload.event!.x;
-            payload.target!.width = newWidth;
-        } else {
-            payload.target!.x = this.refX + (this.refWidth - this.MIN_WIDTH);
-            payload.target!.width = this.MIN_WIDTH;
-        }
-
-        this.refWidth = payload.target!.width;
-        this.refX = payload.target!.x;
     }
 }

@@ -60,7 +60,7 @@ export default class LumCard extends Entity {
     }
 
 
-    public transform(x: number, y: number, width: number, height: number): void {
+    public transform(x: number, y: number, width: number, height: number): void {        
         this.x = x;
         this.y = y;
         this.width = width;
