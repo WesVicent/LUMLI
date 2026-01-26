@@ -59,22 +59,28 @@ export default class LumCard extends Entity {
         this.localGroup.call(selection);
     }
 
+
+    public transform(x: number, y: number, width: number, height: number): void {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+
+        this.localGroup.attr("transform", `translate(${this.x}, ${this.y})`);
+
+        this.rect.attr('width', this.width)
+            .attr('height', this.height);
+
+        this.line.attr('x2', this.width)
+            .attr('y1', this.height - (this.height - 18))
+            .attr('y2', this.height - (this.height - 18));
+    }
+
     public onResize(eventPayload: EventPayload): void {
-        if (this.id === (eventPayload.target as Entity)!.id) {
-            this.x = eventPayload.target!.x;
-            this.y = eventPayload.target!.y;
-            this.width = eventPayload.target!.width;
-            this.height = eventPayload.target!.height;
-
-            this.localGroup.attr("transform", `translate(${this.x}, ${this.y})`);
-
-            this.rect.attr('width', this.width)
-                .attr('height', this.height);
-
-            this.line.attr('x2', this.width)
-                .attr('y1', this.height - (this.height - 18))
-                .attr('y2', this.height - (this.height - 18));
-        }
+        const target = eventPayload.target as Entity;
+        // if (this.id === (eventPayload.target as Entity)!.id) {
+            // this.transform(target?.x, target?.y, target?.width, target?.height);
+        // }
     }
 
     public getPositionAndSize(): EntityBase {
@@ -126,7 +132,7 @@ export default class LumCard extends Entity {
             .on('end', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
                 if (this.isDragging) {
                     this.emitStopMove(new EventPayload(event, this));
-                } 
+                }
 
                 this.emitClickUp(event);
                 this.dragStartPos = undefined as any;

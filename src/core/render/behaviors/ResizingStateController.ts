@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import StateController from "../../state/StateController";
 import Entity from "../entities/Entity";
 import { EventBus } from "../../event/EventBus";
-import {Event} from "../../event/EventNames";
+import { Event } from "../../event/EventNames";
 import EventPayload from "../../event/types/EventPayload";
 import AppState from "../../state/AppState";
 
@@ -68,44 +68,60 @@ export default class ResizingStateController extends StateController {
     private handleOnResizing(payload: EventPayload) {
         if (!this.isResizing || !this.resizeDirection) return;
 
-        switch (this.resizeDirection) {
-            case this.RESIZING_NODES_CLASS_SULFIX.right:
-                this.resizeRight(payload);
+        // switch (this.resizeDirection) {
+        //     case this.RESIZING_NODES_CLASS_SULFIX.right:
+        //         this.resizeRight(payload);
 
-                break;
-            case this.RESIZING_NODES_CLASS_SULFIX.left:
-                this.resizeLeft(payload);
+        //         break;
+        //     case this.RESIZING_NODES_CLASS_SULFIX.left:
+        //         this.resizeLeft(payload);
 
-                break;
-            case this.RESIZING_NODES_CLASS_SULFIX.bottom:
-                this.resizeBottom(payload);
+        //         break;
+        //     case this.RESIZING_NODES_CLASS_SULFIX.bottom:
+        //         this.resizeBottom(payload);
 
-                break;
-            case this.RESIZING_NODES_CLASS_SULFIX.top:
-                this.resizeTop(payload);
+        //         break;
+        //     case this.RESIZING_NODES_CLASS_SULFIX.top:
+        //         this.resizeTop(payload);
 
-                break;
-            case this.RESIZING_NODES_CLASS_SULFIX.topRight:
-                this.resizeTop(payload);
-                this.resizeRight(payload);
+        //         break;
+        //     case this.RESIZING_NODES_CLASS_SULFIX.topRight:
+        //         this.resizeTop(payload);
+        //         this.resizeRight(payload);
 
-                break;
-            case this.RESIZING_NODES_CLASS_SULFIX.topLeft:
-                this.resizeTop(payload);
-                this.resizeLeft(payload);
+        //         break;
+        //     case this.RESIZING_NODES_CLASS_SULFIX.topLeft:
+        //         this.resizeTop(payload);
+        //         this.resizeLeft(payload);
 
-                break;
-            case this.RESIZING_NODES_CLASS_SULFIX.bottomLeft:
-                this.resizeBottom(payload);
-                this.resizeLeft(payload);
+        //         break;
+        //     case this.RESIZING_NODES_CLASS_SULFIX.bottomLeft:
+        //         this.resizeBottom(payload);
+        //         this.resizeLeft(payload);
 
-                break;
-            case this.RESIZING_NODES_CLASS_SULFIX.bottomRight:
-                this.resizeBottom(payload);
-                this.resizeRight(payload);
+        //         break;
+        //     case this.RESIZING_NODES_CLASS_SULFIX.bottomRight:
+        //         this.resizeBottom(payload);
+        //         this.resizeRight(payload);
 
-                break;
-        }
+        //         break;
+        // }
+
+        this.appState.selectedEntities.forEach((entity: Entity) => {
+
+            this.refId = entity.id;
+            this.refWidth = entity.width;
+            this.refHeight = entity.height;
+            this.refX = entity.x;
+            this.refY = entity.y;
+
+            if (this.refX + this.refWidth > this.MIN_WIDTH) {
+                entity.width = Math.max(this.MIN_WIDTH, payload.event!.x - this.refX);
+                this.refWidth = entity.width;
+            }
+
+            entity.transform(entity.x, entity.y, entity.width, entity.height);
+        });
     }
 
     private handleOnResizeEnd(payload: EventPayload) {

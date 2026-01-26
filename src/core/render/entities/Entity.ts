@@ -71,6 +71,8 @@ export default abstract class Entity extends EntityBase {
   public abstract draw(): void;
   
   abstract translate(x: number, y: number): void;
+  
+  public abstract transform(x: number, y: number, width: number, height: number): void;
 
   protected abstract setSelected(selected: boolean): void;
 
