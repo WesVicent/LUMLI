@@ -10,6 +10,11 @@ import Context from "../../../app/Context";
 export default class BoundaryBox extends Entity {
     private nodes: Array<IdAndPositions>;
 
+    private dragStartPos!: { x: number, y: number };
+    private isDragging = false;
+
+    private box!: D3RectElementSelection;
+
     private readonly RESIZING_NODES_SIZE: number = 8;
     private readonly RESIZING_NODES_CLASS_SULFIX = {
         topLeft: 'topLeft',
@@ -115,8 +120,7 @@ export default class BoundaryBox extends Entity {
     }
 
     public draw(): void {
-        // Box
-        this.renderService.drawPrimitiveRect(this.x, this.y, this.width, this.height)
+        this.box = this.renderService.drawPrimitiveRect(this.x, this.y, this.width, this.height)
             .attr('id', 'b-box')
             .attr('visibility', 'hidden')
             .attr('display', 'none')
@@ -194,7 +198,7 @@ export default class BoundaryBox extends Entity {
     }
 
     private setupDragHandler(): void {
-        const dragHandler = d3.drag<SVGGElement, unknown, void>()
+        const resizingNodesDragHandler = d3.drag<SVGGElement, unknown, void>()
             .on('start', (event: d3.D3DragEvent<SVGGElement, unknown, void>) => {
                 this.emitStartResize(new EventPayload(event, this));
             })
@@ -206,7 +210,41 @@ export default class BoundaryBox extends Entity {
                 this.emitStopResize(new EventPayload(event, this));
             });
 
-        this.renderService.selectAll<SVGGElement>('#rsz-node')
-            .call(dragHandler);
+        const dragHandler = d3.drag<SVGRectElement, unknown, void>()
+            .filter(() => {
+                return true; // Allow all events
+            })
+            .on('start', (event: D3DragRectEvent) => {
+                this.dragStartPos = { x: event.x, y: event.y };
+
+            })
+            .on('drag', (event: D3DragRectEvent) => {
+
+                const dx = Math.abs(event.x - this.dragStartPos.x);
+                const dy = Math.abs(event.y - this.dragStartPos.y);
+
+                // Wait 5 pixels before start drag.
+                if (!this.isDragging && (dx > 5 || dy > 5)) {
+                    this.isDragging = true;
+                    this.emitStartMove(new EventPayload(event, this));
+                }
+
+                if (this.isDragging) {
+                    this.emitMoving(new EventPayload(event, this));
+                }
+            })
+            .on('end', (event: D3DragRectEvent) => {
+                if (this.isDragging) {
+                    this.emitStopMove(new EventPayload(event, this));
+                }
+
+                this.dragStartPos = undefined as any;
+                this.isDragging = false;
+            });
+
+            
+            
+            this.renderService.selectAll<SVGGElement>('#rsz-node').call(resizingNodesDragHandler);
+            this.box.call(dragHandler);
     }
 }

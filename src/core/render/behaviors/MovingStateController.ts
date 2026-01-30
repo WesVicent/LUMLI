@@ -3,6 +3,7 @@ import EventPayload from "../../event/types/EventPayload";
 import StateController from "../../state/StateController";
 import Entity from "../entities/Entity";
 import Context from "../../app/Context";
+import BoundaryBox from "../entities/GUI/BoundaryBox";
 
 export default class MovingStateController extends StateController {
     private hasTriggered = false;
@@ -24,9 +25,9 @@ export default class MovingStateController extends StateController {
     }
 
     private updateEntityPositions(payload: EventPayload) {
-        const event = payload.event!;
+        const event = payload.event!;        
 
-        if (this.context.__appState.selectedEntities.includes(payload.target as Entity)) {
+        if (this.context.__appState.selectedEntities.includes(payload.target as Entity) || payload.target instanceof BoundaryBox) {
             this.context.__appState.selectedEntities.forEach(entity => {
                 entity.x += event.dx;
                 entity.y += event.dy;

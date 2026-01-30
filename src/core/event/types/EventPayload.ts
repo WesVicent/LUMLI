@@ -7,7 +7,7 @@ export default class EventPayload {
     public event?: LumMultiDragEvent;
     public target?: LumMultiEventTarget;
 
-    constructor(event?: D3DragGroupEvent, target?: LumMultiEventTarget) {
+    constructor(event?: LumMultiDragEvent, target?: LumMultiEventTarget) {
         this.event = event;
         this.target = target;
     }
