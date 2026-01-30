@@ -5,13 +5,14 @@ import EntityBase from "../types/EntityBase";
 import Entity from "../Entity";
 import EventPayload from "../../../event/types/EventPayload";
 import Context from "../../../app/Context";
+import LumText from "./LumText";
 
 export default class LumCard extends Entity {
     public localGroup!: D3GElementSelection;
 
     private rect!: D3RectElementSelection;
     private line!: D3LineElementSelection;
-    // private text: LumText;
+    private text!: LumText;
 
     private dragStartPos!: { x: number, y: number };
     private isDragging = false;
@@ -20,7 +21,7 @@ export default class LumCard extends Entity {
     private readonly MIN_WIDTH = 40;
     private readonly MIN_HEIGHT = 40;
 
-    constructor(context: Context, id: string, x: number, y: number, width: number, height: number, renderService: RenderService) {
+    constructor(context: Context, id: string, x: number, y: number, width: number, height: number, text: string, renderService: RenderService) {
         super(context, id, x, y, width, height, renderService);
 
         width = width < this.MIN_WIDTH ? this.MIN_WIDTH : width;
@@ -28,20 +29,16 @@ export default class LumCard extends Entity {
 
         this.width = width;
         this.height = height;
-
-        // this.text = text;
+        
+        this.text = new LumText(this.context, this.x, this.y, this.width, this.height, 18, text, this.renderService);
     }
 
     public draw(): void {
         this.localGroup = this.renderService.createPrimitiveGroup(this.id, this.x, this.y, this.width, this.height);
-        // let stringText = '123456789-12345678';
 
-        const rect = this.renderService.drawPrimitiveRect(0, 0, this.width, this.height, this.localGroup);
-        const line = this.renderService.drawPrimitiveLine(0, 0 + this.height / 5, this.width, this.localGroup);
-        // const text = renderService.drawText(0, 0, width, height, 18, `${stringText}${stringText}${stringText}${stringText}${stringText}`, this.localGroup);
-
-        this.rect = rect;
-        this.line = line;
+        this.rect = this.renderService.drawPrimitiveRect(0, 0, this.width, this.height, this.localGroup);
+        this.line = this.renderService.drawPrimitiveLine(0, 0 + this.height / 5, this.width, this.localGroup);
+        this.text.draw(this.localGroup);
 
         this.setupDragHandler();
     }
@@ -56,7 +53,7 @@ export default class LumCard extends Entity {
     }
 
 
-    public transform(x: number, y: number, width: number, height: number): void {        
+    public transform(x: number, y: number, width: number, height: number): void {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -70,6 +67,8 @@ export default class LumCard extends Entity {
         this.line.attr('x2', this.width)
             .attr('y1', this.height - (this.height - 20))
             .attr('y2', this.height - (this.height - 20));
+            
+            this.text.transform(x, y, width, height);
     }
 
     public getPositionAndSize(): EntityBase {
@@ -139,5 +138,6 @@ export default class LumCard extends Entity {
 
     public translate(x: number, y: number): void {
         this.localGroup.attr("transform", `translate(${x}, ${y})`);
+        this.text.translate(x, y);
     }
 }

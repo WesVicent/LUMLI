@@ -1,67 +1,84 @@
-// import RenderService from "../engines/d3/RenderService";
-// import Entity from "./EntityBase";
+import Context from "../../../app/Context";
+import RenderService from "../../engines/d3/RenderService";
+import Entity from "../Entity";
 
-// export default class LumText extends Entity {
-//     protected draw(): void {
-//         console.log("Method not implemented.");
-//     }
-//     private textElement: D3TextElement;
-//     private x: number;
-//     private y: number;
-//     private text: string;
-    
-//     private charPerLine: number;
+export default class LumText extends Entity {
+    private localGroup!: D3GElementSelection;
+    private fontSize: number;
 
-//     private containerWidth = 0;
-//     private containerHeight = 0;
+    private textElement!: D3TextElementSelection;
+    private text: string;
 
-//     public constructor(x: number, y: number, areaWidth: number, areaHeight: number, fontSize: number, text: string, renderService: RenderService, group?: D3GElement) {
-//         super();
+    private charPerLine!: number;
 
-//         /* 
-//             An area width of 350 fits 18 chars with size of 35.
+    public constructor(context: Context, x: number, y: number, areaWidth: number, areaHeight: number, fontSize: number, text: string, renderService: RenderService) {
+        super(context, '', x, y, areaWidth, areaHeight, renderService);
 
-//             AreaHorizontal (A): 350
-//             CharPerLine (N): 18
-//             CharSize (S): 35
+        this.x = x;
+        this.y = y;
+        this.fontSize = fontSize;
+        this.text = text;
+    }
+
+    private breakIntoMultipleLines(text: string) {
+        if (text.length > this.charPerLine) {
+            this.append(text.slice(0, this.charPerLine));
+            this.breakIntoMultipleLines(text.slice(this.charPerLine, text.length));
             
-//             Scaling constant (k): A / (N * S) = 5 / 9
+            return;
+        }
 
-//             N = A / ((5 / 9) * S)
-//         */
-//         this.charPerLine = Math.floor(areaWidth / Math.floor(areaWidth / (areaWidth / ((5 / 9) * fontSize))));
+        this.append(text);       
+    }
 
-//         this.x = x;
-//         this.y = y;
-//         this.text = text;
-//         this.containerWidth = areaWidth;
-//         this.containerHeight = areaHeight;
-//         this.textElement = renderService.drawPrimitiveText(x, y, fontSize, text.slice(0, this.charPerLine), group);
+    public remove() {
+        this.textElement.remove();
+    }
 
+    public append(text: string): D3TextSpanElementSelection {
+        return this.textElement.append('tspan')
+            .attr('x', 0)
+            .attr('dy', '1em')
+            .text(text);
+    }
 
-//         if(text.length > this.charPerLine) {
-//             this.breakLine(text.slice(18, text.length));
-//         }
-//     }
+    translate(x: number, y: number): void {
+        
+        this.localGroup.attr("transform", `translate(${x}, ${y})`);
+    }
 
-//     private breakLine(text: string) {
-//         if(text.length > this.charPerLine) {
-//             this.append(text.slice(0 ,this.charPerLine));
-//             this.breakLine(text.slice(this.charPerLine, text.length));
-//             return;
-//         }
+    public transform(x: number, y: number, width: number, height: number): void {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
 
-//         this.append(text);
-//     }
+        this.remove();
+        this.draw();
+    }
 
-//     public remove() {
-//         this.textElement.remove();
-//     }
+    public draw(localGroup?: D3GElementSelection): void {
+        this.localGroup = localGroup || this.localGroup;
 
-//     public append(text: string): D3TextSpanElement {
-//         return this.textElement.append('tspan')
-//             .attr('x', this.x)
-//             .attr('dy', '1em')
-//             .text(text);
-//     }
-// }
+        /*
+            An area width of 350 fits 18 chars with size of 35.
+
+            AreaHorizontal (A): 350
+            CharPerLine (N): 18
+            CharSize (S): 35
+            
+            Scaling constant (k): A / (N * S) = 5 / 9
+
+            N = A / ((5 / 9) * S)
+        */
+
+        this.charPerLine = Math.floor(this.width / Math.floor(this.width / (this.width / ((5 / 9) * this.fontSize))));
+        this.textElement = this.renderService.drawPrimitiveText(0, 0, this.fontSize, this.text.slice(0, this.charPerLine), this.localGroup);
+
+        if (this.text.length > this.charPerLine) {
+            this.breakIntoMultipleLines(this.text.slice(this.charPerLine, this.text.length));
+        }
+    }
+
+    protected setSelected(): void { }
+}
