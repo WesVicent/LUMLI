@@ -21,9 +21,7 @@ class Lum {
         const contextWidth = element?.clientWidth || 100;
         const contextHeight = element?.clientHeight || 100;
 
-        const appState = new AppState();
-        const appContext = new Context(appState);
-        const eventBus = new EventBus();
+        const appContext = new Context(new EventBus(), new AppState());
 
         const renderContext = new RenderContext(svg, contextWidth, contextHeight);
         const renderService: RenderService = new RenderService(renderContext);
@@ -35,20 +33,20 @@ class Lum {
         const Y_POS = renderContext.vCenter - HEIGHT / 2;
 
         // INPUT
-        new KeyboardStateController(eventBus, appState);
-        new MouseStateController(eventBus, appState);
+        new KeyboardStateController(appContext);
+        new MouseStateController(appContext);
 
         // BEHAVIOR
-        new MovingStateController(eventBus, appState);
-        new ResizingStateController(eventBus, appState);
-        new SelectionStateController(eventBus, appState);
+        new MovingStateController(appContext);
+        new ResizingStateController(appContext);
+        new SelectionStateController(appContext);
 
         const entities = [
-            new LumCard(appContext, 'card-1', X_POS - WIDHT, Y_POS - HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
-            new LumCard(appContext, 'card-2', X_POS, Y_POS, WIDHT, HEIGHT, renderService, eventBus),
-            new LumCard(appContext, 'card-3', X_POS + WIDHT, Y_POS + HEIGHT, WIDHT, HEIGHT, renderService, eventBus),
+            new LumCard(appContext, 'card-1', X_POS - WIDHT, Y_POS - HEIGHT, WIDHT, HEIGHT, renderService),
+            new LumCard(appContext, 'card-2', X_POS, Y_POS, WIDHT, HEIGHT, renderService),
+            new LumCard(appContext, 'card-3', X_POS + WIDHT, Y_POS + HEIGHT, WIDHT, HEIGHT, renderService),
 
-            new BoundaryBox(appContext, 'b-box', 0, 0, 0, 0, renderService, eventBus),
+            new BoundaryBox(appContext, 'b-box', 0, 0, 0, 0, renderService),
         ];
 
         entities.forEach(entity => {
@@ -57,7 +55,6 @@ class Lum {
     }
 }
 
-// When the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     Lum.init();
 });

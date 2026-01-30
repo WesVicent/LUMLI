@@ -1,15 +1,14 @@
-import AppState from "../../state/AppState";
-import { EventBus } from "../../event/EventBus";
 import {Event} from "../../event/EventNames";
 import EventPayload from "../../event/types/EventPayload";
 import StateController from "../../state/StateController";
 import Entity from "../entities/Entity";
+import Context from "../../app/Context";
 
 export default class MovingStateController extends StateController {
     private hasTriggered = false;
 
-    constructor(eventBus: EventBus, appState: AppState) {
-        super(eventBus, appState);
+    constructor(context: Context) {
+        super(context);
     }
 
     protected listenToEvents(): void {
@@ -27,8 +26,8 @@ export default class MovingStateController extends StateController {
     private updateEntityPositions(payload: EventPayload) {
         const event = payload.event!;
 
-        if (this.appState.selectedEntities.includes(payload.target as Entity)) {
-            this.appState.selectedEntities.forEach(entity => {
+        if (this.context.__appState.selectedEntities.includes(payload.target as Entity)) {
+            this.context.__appState.selectedEntities.forEach(entity => {
                 entity.x += event.dx;
                 entity.y += event.dy;
 
@@ -36,7 +35,7 @@ export default class MovingStateController extends StateController {
             });
         } else { // If no entity was clicked yet, or clicked entity isn't selected.
             if (!this.hasTriggered) {
-                this.eventBus.trigger(Event.selection.SELECT, payload);
+                this.context.__eventBus.trigger(Event.selection.SELECT, payload);
                 
                 this.hasTriggered = true;
             }

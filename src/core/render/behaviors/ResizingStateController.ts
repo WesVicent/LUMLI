@@ -1,37 +1,14 @@
 import * as d3 from "d3";
 import StateController from "../../state/StateController";
 import Entity from "../entities/Entity";
-import { EventBus } from "../../event/EventBus";
 import { Event } from "../../event/EventNames";
 import EventPayload from "../../event/types/EventPayload";
-import AppState from "../../state/AppState";
-
-interface EntityInitialState { // Remove from here
-    id: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-
-    relativeX: number;
-    relativeY: number;
-}
-
-interface BoundaryBox { // Remove from here
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    right: number;
-    bottom: number;
-}
+import Context from "../../app/Context";
 
 export default class ResizingStateController extends StateController {
     private readonly MIN_WIDTH = 40;
     private readonly MIN_HEIGHT = 40;
 
-    private initialEntityStates: Map<string, EntityInitialState> = new Map();
-    private initialBoundaryBox: BoundaryBox | null = null;
     private isResizing = false;
     private resizeDirection: string | null = null;
 
@@ -46,8 +23,8 @@ export default class ResizingStateController extends StateController {
         bottomRight: 'bottomRight',
     };
 
-    constructor(eventBus: EventBus, appState: AppState) {
-        super(eventBus, appState);
+    constructor(context: Context) {
+        super(context);
     }
 
     protected listenToEvents(): void {
@@ -67,46 +44,7 @@ export default class ResizingStateController extends StateController {
             .find(className => className.startsWith('resize-'))
             ?.replace('resize-', '') || null;
 
-        this.storeInitialStates();
-    }
-
-    private storeInitialStates(): void { // Move to SelectionStateController
-        const selected = this.appState.selectedEntities;
-        this.initialEntityStates.clear();
-
-        let minX = Infinity, maxX = -Infinity;
-        let minY = Infinity, maxY = -Infinity;
-
-        selected.forEach(entity => {
-            minX = Math.min(minX, entity.x);
-            maxX = Math.max(maxX, entity.x + entity.width);
-            minY = Math.min(minY, entity.y);
-            maxY = Math.max(maxY, entity.y + entity.height);
-        });
-
-        this.initialBoundaryBox = {
-            x: minX,
-            y: minY,
-            width: maxX - minX,
-            height: maxY - minY,
-            right: maxX,
-            bottom: maxY
-        };
-
-        selected.forEach(entity => {
-            const relativeX = entity.x - this.initialBoundaryBox!.x;
-            const relativeY = entity.y - this.initialBoundaryBox!.y;
-
-            this.initialEntityStates.set(entity.id, {
-                id: entity.id,
-                x: entity.x,
-                y: entity.y,
-                width: entity.width,
-                height: entity.height,
-                relativeX: relativeX,
-                relativeY: relativeY
-            });
-        });
+        this.context.storeInitialStates();
     }
 
     private handleOnResizing(payload: EventPayload) {
@@ -116,9 +54,9 @@ export default class ResizingStateController extends StateController {
     }
 
     private handleResize(payload: EventPayload) {
-        if (!this.initialBoundaryBox) return;
+        if (!this.context.__appState.initialBoundaryBox) return;
 
-        const selected = this.appState.selectedEntities;
+        const selected = this.context.__appState.selectedEntities;
 
         switch (this.resizeDirection) {
             case this.RESIZING_NODES_CLASS_SULFIX.right:
@@ -156,13 +94,13 @@ export default class ResizingStateController extends StateController {
     }
 
     private updateEntities(): void {
-        this.appState.selectedEntities.forEach(entity => {
+        this.context.__appState.selectedEntities.forEach(entity => {
             entity.transform(entity.x, entity.y, entity.width, entity.height);
         });
     }
 
     private updateBoundaryBox(boundaryBox: Entity): void {
-        const selected = this.appState.selectedEntities;
+        const selected = this.context.__appState.selectedEntities;
         if (selected.length === 0) return;
 
         let maxX = -Infinity;
@@ -187,35 +125,35 @@ export default class ResizingStateController extends StateController {
     }
 
     private resizeRight(payload: EventPayload, selected: Entity[]): void {
-        if (!this.initialBoundaryBox) return;
+        if (!this.context.__appState.initialBoundaryBox) return;
 
-        const deltaX = payload.event!.x - this.initialBoundaryBox.right;
-        const scaleX = 1 + (deltaX / this.initialBoundaryBox.width);
+        const deltaX = payload.event!.x - this.context.__appState.initialBoundaryBox.right;
+        const scaleX = 1 + (deltaX / this.context.__appState.initialBoundaryBox.width);
 
         selected.forEach(entity => {
-            const initialState = this.initialEntityStates.get(entity.id);
+            const initialState = this.context.__appState.initialEntityStates.get(entity.id);
             if (!initialState) return;
 
             if(initialState.width * scaleX >= this.MIN_WIDTH) { 
-                entity.x = this.initialBoundaryBox!.x + (initialState.relativeX * scaleX);
+                entity.x = this.context.__appState.initialBoundaryBox!.x + (initialState.relativeX * scaleX);
                 entity.width = Math.max(this.MIN_WIDTH, initialState.width * scaleX);
             }
         });
     }
 
     private resizeLeft(payload: EventPayload, selected: Entity[]): void {
-        if (!this.initialBoundaryBox) return;
+        if (!this.context.__appState.initialBoundaryBox) return;
 
-        const deltaX = payload.event!.x - this.initialBoundaryBox.x;
-        const scaleX = 1 - (deltaX / this.initialBoundaryBox.width);
+        const deltaX = payload.event!.x - this.context.__appState.initialBoundaryBox.x;
+        const scaleX = 1 - (deltaX / this.context.__appState.initialBoundaryBox.width);
 
         selected.forEach(entity => {
-            const initialState = this.initialEntityStates.get(entity.id);
+            const initialState = this.context.__appState.initialEntityStates.get(entity.id);
             if (!initialState) return;
 
             if(initialState.width * scaleX >= this.MIN_WIDTH) {
-                const newLeftEdge = this.initialBoundaryBox!.x + deltaX;
-                const offsetFromLeft = initialState.x - this.initialBoundaryBox!.x;
+                const newLeftEdge = this.context.__appState.initialBoundaryBox!.x + deltaX;
+                const offsetFromLeft = initialState.x - this.context.__appState.initialBoundaryBox!.x;
     
                 entity.x = newLeftEdge + (offsetFromLeft * scaleX);
                 entity.width = Math.max(this.MIN_WIDTH, initialState.width * scaleX);
@@ -224,17 +162,17 @@ export default class ResizingStateController extends StateController {
     }
 
     private resizeBottom(payload: EventPayload, selected: Entity[]): void {
-        if (!this.initialBoundaryBox) return;
+        if (!this.context.__appState.initialBoundaryBox) return;
 
-        const deltaY = payload.event!.y - this.initialBoundaryBox.bottom;
-        const scaleY = 1 + (deltaY / this.initialBoundaryBox.height);
+        const deltaY = payload.event!.y - this.context.__appState.initialBoundaryBox.bottom;
+        const scaleY = 1 + (deltaY / this.context.__appState.initialBoundaryBox.height);
 
         selected.forEach(entity => {
-            const initialState = this.initialEntityStates.get(entity.id);
+            const initialState = this.context.__appState.initialEntityStates.get(entity.id);
             if (!initialState) return;
 
             if(initialState.height * scaleY >= this.MIN_WIDTH) {
-                entity.y = this.initialBoundaryBox!.y + (initialState.relativeY * scaleY);
+                entity.y = this.context.__appState.initialBoundaryBox!.y + (initialState.relativeY * scaleY);
                 entity.height = Math.max(this.MIN_HEIGHT, initialState.height * scaleY);
             }
 
@@ -243,18 +181,18 @@ export default class ResizingStateController extends StateController {
     }
 
     private resizeTop(payload: EventPayload, selected: Entity[]): void {
-        if (!this.initialBoundaryBox) return;
+        if (!this.context.__appState.initialBoundaryBox) return;
 
-        const deltaY = payload.event!.y - this.initialBoundaryBox.y;
-        const scaleY = 1 - (deltaY / this.initialBoundaryBox.height);
+        const deltaY = payload.event!.y - this.context.__appState.initialBoundaryBox.y;
+        const scaleY = 1 - (deltaY / this.context.__appState.initialBoundaryBox.height);
 
         selected.forEach(entity => {
-            const initialState = this.initialEntityStates.get(entity.id);
+            const initialState = this.context.__appState.initialEntityStates.get(entity.id);
             if (!initialState) return;
 
             if(initialState.height * scaleY >= this.MIN_WIDTH) {
-                const newTopEdge = this.initialBoundaryBox!.y + deltaY;
-                const offsetFromTop = initialState.y - this.initialBoundaryBox!.y;
+                const newTopEdge = this.context.__appState.initialBoundaryBox!.y + deltaY;
+                const offsetFromTop = initialState.y - this.context.__appState.initialBoundaryBox!.y;
     
                 entity.y = newTopEdge + (offsetFromTop * scaleY);
                 entity.height = Math.max(this.MIN_HEIGHT, initialState.height * scaleY);
@@ -266,8 +204,8 @@ export default class ResizingStateController extends StateController {
     private handleOnResizeEnd(payload: EventPayload) {
         this.isResizing = false;
         this.resizeDirection = null;
-        this.initialBoundaryBox = null;
-        this.initialEntityStates.clear();
+        this.context.__appState.initialBoundaryBox = null;
+        this.context.__appState.initialEntityStates.clear();
 
         if (payload.target) {
             payload.target!.x += payload.event!.dx;

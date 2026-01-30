@@ -1,12 +1,11 @@
-import { EventBus } from "../event/EventBus";
+import Context from "../app/Context";
 import { Event as EventNames } from "../event/EventNames";
-import AppState from "../state/AppState";
 import StateController from "../state/StateController";
 
 export default class MouseStateController extends StateController {
 
-    constructor(eventBus: EventBus, appState: AppState) {
-        super(eventBus, appState);
+    constructor(context: Context) {
+        super(context);
 
         this.setupListeners();
     }
@@ -18,7 +17,7 @@ export default class MouseStateController extends StateController {
 
         diagram?.addEventListener('click', (event: Event) => {
             if (event.target === diagram) {
-                this.eventBus.trigger(EventNames.global.CONTAINER_CLICK);
+                this.context.__eventBus.trigger(EventNames.global.CONTAINER_CLICK);
             }
         });
     }

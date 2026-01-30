@@ -1,24 +1,22 @@
-import AppState from './AppState';
-import { EventBus } from '../event/EventBus';
 import EventPayload from '../event/types/EventPayload';
+import Context from '../app/Context';
 
 export default abstract class StateController {
-  protected appState: AppState;
-  protected eventBus: EventBus;
+  protected context: Context;
 
-  constructor(eventBus: EventBus, appState: AppState) {
-    this.appState = appState;
-    this.eventBus = eventBus;
+  constructor(context: Context) {
+    this.context = context;
+
     this.listenToEvents();
   }
 
   protected abstract listenToEvents(): void;
 
   protected listen(event: number, handler: (payload: EventPayload) => void) {
-    this.eventBus.listen(event, handler);
+    this.context.__eventBus.listen(event, handler);
   }
 
   protected trigger(event: number, payload: EventPayload) {
-    this.eventBus.trigger(event, payload);
+    this.context.__eventBus.trigger(event, payload);
   }
 }

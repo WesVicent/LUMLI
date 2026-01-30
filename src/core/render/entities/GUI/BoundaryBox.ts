@@ -3,7 +3,6 @@ import RenderService from "../../engines/d3/RenderService";
 import IdAndPositions from "../interfaces/IdAndPositions";
 import Entity from "../Entity";
 import EntityBase from "../types/EntityBase";
-import { EventBus } from "../../../event/EventBus";
 import { Event } from "../../../event/EventNames";
 import EventPayload from "../../../event/types/EventPayload";
 import Context from "../../../app/Context";
@@ -23,15 +22,15 @@ export default class BoundaryBox extends Entity {
         left: 'left',
     };
 
-    constructor(context: Context, id: string, x: number, y: number, width: number, height: number, renderService: RenderService, eventBus: EventBus) {
-        super(context, id, x, y, width, height, eventBus, renderService);
+    constructor(context: Context, id: string, x: number, y: number, width: number, height: number, renderService: RenderService) {
+        super(context, id, x, y, width, height, renderService);
 
         this.nodes = this.createNodePositionsArray(x, y, width, height);
 
-        this.eventBus.listen(Event.selection.SELECT, this.handleSelectionChange.bind(this));
-        this.eventBus.listen(Event.selection.UNSELECT, this.handleSelectionChange.bind(this));
-        this.eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
-        this.eventBus.listen(Event.entity.STOP_MOVEMENT, this.handleStopMoving.bind(this));
+        this.context.__eventBus.listen(Event.selection.SELECT, this.handleSelectionChange.bind(this));
+        this.context.__eventBus.listen(Event.selection.UNSELECT, this.handleSelectionChange.bind(this));
+        this.context.__eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
+        this.context.__eventBus.listen(Event.entity.STOP_MOVEMENT, this.handleStopMoving.bind(this));
     }
 
     protected setSelected(selected: boolean): void {
@@ -56,7 +55,7 @@ export default class BoundaryBox extends Entity {
     }
 
     private findAnchorSelection(): { x: number; y: number } {
-        const selected = this.context.selected();
+        const selected = this.context.__appState.selectedEntities;
 
         let mostLeft = selected[0];
         let mostTop = selected[0];
@@ -75,7 +74,7 @@ export default class BoundaryBox extends Entity {
 
         let anchorPoint = { x: target.x, y: target.y };
 
-        if (this.context.selected().length > 1) {
+        if (this.context.__appState.selectedEntities.length > 1) {
             anchorPoint = this.findAnchorSelection();
         }
 

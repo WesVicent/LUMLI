@@ -1,10 +1,9 @@
-import AppState from "../state/AppState";
-import { EventBus } from "../event/EventBus";
 import StateController from "../state/StateController";
+import Context from "../app/Context";
 
 export default class KeyboardStateController extends StateController {
-    constructor(eventBus: EventBus, appState: AppState) {
-        super(eventBus, appState);
+    constructor(context: Context) {
+        super(context);
 
         this.setupListeners();
     }
@@ -33,13 +32,13 @@ export default class KeyboardStateController extends StateController {
         switch (event.key) {
             case 'Control':
             case 'Meta':
-                this.appState.keyboard.ctrlPressed = true;
+                this.context.__appState.keyboard.ctrlPressed = true;
                 break;
             case 'Shift':
-                this.appState.keyboard.shiftPressed = true;
+                this.context.__appState.keyboard.shiftPressed = true;
                 break;
             case 'Alt':
-                this.appState.keyboard.altPressed = true;
+                this.context.__appState.keyboard.altPressed = true;
                 break;
 
             default:
@@ -52,13 +51,13 @@ export default class KeyboardStateController extends StateController {
         switch (event.key) {
             case 'Control':
             case 'Meta':
-                this.appState.keyboard.ctrlPressed = false;
+                this.context.__appState.keyboard.ctrlPressed = false;
                 break;
             case 'Shift':
-                this.appState.keyboard.shiftPressed = false;
+                this.context.__appState.keyboard.shiftPressed = false;
                 break;
             case 'Alt':
-                this.appState.keyboard.altPressed = false;
+                this.context.__appState.keyboard.altPressed = false;
                 break;
             default:
                 console.log(event.key);
@@ -67,20 +66,20 @@ export default class KeyboardStateController extends StateController {
     }
 
     private clearAll() {
-        this.appState.keyboard.ctrlPressed = false;
-        this.appState.keyboard.shiftPressed = false;
-        this.appState.keyboard.altPressed = false;
+        this.context.__appState.keyboard.ctrlPressed = false;
+        this.context.__appState.keyboard.shiftPressed = false;
+        this.context.__appState.keyboard.altPressed = false;
     }
 
     public isCtrlPressed(): boolean {
-        return this.appState.keyboard.ctrlPressed;
+        return this.context.__appState.keyboard.ctrlPressed;
     }
 
     public isShiftPressed(): boolean {
-        return this.appState.keyboard.shiftPressed;
+        return this.context.__appState.keyboard.shiftPressed;
     }
 
     public isAltPressed(): boolean {
-        return this.appState.keyboard.altPressed;
+        return this.context.__appState.keyboard.altPressed;
     }
 }

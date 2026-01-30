@@ -1,5 +1,4 @@
 import Context from '../../app/Context';
-import { EventBus } from '../../event/EventBus';
 import { Event } from '../../event/EventNames';
 import EventPayload from '../../event/types/EventPayload';
 import RenderService from '../engines/d3/RenderService';
@@ -7,7 +6,6 @@ import EntityBase from './types/EntityBase';
 
 export default abstract class Entity extends EntityBase {
   protected context: Context;
-  protected eventBus: EventBus;
   
   protected isSelected: boolean = false;
 
@@ -18,11 +16,10 @@ export default abstract class Entity extends EntityBase {
   public width: number;
   public height: number;
 
-  constructor(context: Context, id: string, x: number, y: number, width: number, height: number, eventBus: EventBus, renderService: RenderService) {
+  constructor(context: Context, id: string, x: number, y: number, width: number, height: number, renderService: RenderService) {
     super(id, x, y, width, height);
 
     this.context = context;
-    this.eventBus = eventBus;
     this.renderService = renderService;
     this.id = id;
     this.x = x;
@@ -30,9 +27,9 @@ export default abstract class Entity extends EntityBase {
     this.width = width;
     this.height = height;
 
-    this.eventBus.listen(Event.selection.SELECT, this.onSelected.bind(this));
-    this.eventBus.listen(Event.selection.UNSELECT, this.onUnselected.bind(this));
-    this.eventBus.listen(Event.selection.CLEAR, this.onSelectionClear.bind(this));
+    this.context.__eventBus.listen(Event.selection.SELECT, this.onSelected.bind(this));
+    this.context.__eventBus.listen(Event.selection.UNSELECT, this.onUnselected.bind(this));
+    this.context.__eventBus.listen(Event.selection.CLEAR, this.onSelectionClear.bind(this));
   }
 
   protected emitClickUp(event?: LumMultiDragEvent) {
@@ -65,7 +62,7 @@ export default abstract class Entity extends EntityBase {
   }
 
   private emit(event: number, data: any) {
-    this.eventBus.trigger(event, { entityId: this.id, ...data });
+    this.context.__eventBus.trigger(event, { entityId: this.id, ...data });
   }
   
   public abstract draw(): void;

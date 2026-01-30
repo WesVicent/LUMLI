@@ -3,8 +3,6 @@ import RenderService from "../../engines/d3/RenderService";
 // import LumText from "./LumText";
 import EntityBase from "../types/EntityBase";
 import Entity from "../Entity";
-import { Event } from "../../../event/EventNames";
-import { EventBus } from "../../../event/EventBus";
 import EventPayload from "../../../event/types/EventPayload";
 import Context from "../../../app/Context";
 
@@ -22,16 +20,14 @@ export default class LumCard extends Entity {
     private readonly MIN_WIDTH = 40;
     private readonly MIN_HEIGHT = 40;
 
-    constructor(context: Context, id: string, x: number, y: number, width: number, height: number, renderService: RenderService, eventBus: EventBus) {
-        super(context, id, x, y, width, height, eventBus, renderService);
+    constructor(context: Context, id: string, x: number, y: number, width: number, height: number, renderService: RenderService) {
+        super(context, id, x, y, width, height, renderService);
 
         width = width < this.MIN_WIDTH ? this.MIN_WIDTH : width;
         height = height < this.MIN_HEIGHT ? this.MIN_HEIGHT : height;
 
         this.width = width;
         this.height = height;
-
-        eventBus.listen(Event.entity.RESIZING, this.onResize.bind(this));
 
         // this.text = text;
     }
@@ -72,15 +68,8 @@ export default class LumCard extends Entity {
             .attr('height', this.height);
 
         this.line.attr('x2', this.width)
-            .attr('y1', this.height - (this.height - 18))
-            .attr('y2', this.height - (this.height - 18));
-    }
-
-    public onResize(eventPayload: EventPayload): void {
-        const target = eventPayload.target as Entity;
-        // if (this.id === (eventPayload.target as Entity)!.id) {
-            // this.transform(target?.x, target?.y, target?.width, target?.height);
-        // }
+            .attr('y1', this.height - (this.height - 20))
+            .attr('y2', this.height - (this.height - 20));
     }
 
     public getPositionAndSize(): EntityBase {
