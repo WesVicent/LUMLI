@@ -36,6 +36,17 @@ export default class BoundaryBox extends Entity {
         this.context.__eventBus.listen(Event.selection.UNSELECT, this.handleSelectionChange.bind(this));
         this.context.__eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
         this.context.__eventBus.listen(Event.entity.STOP_MOVEMENT, this.handleStopMoving.bind(this));
+
+        context.__eventBus.listen(Event.global.ENTER_POINTING_MODE, this.onEnterPointingMode.bind(this));
+        context.__eventBus.listen(Event.global.LEAVE_POINTING_MODE, this.onLeavePointingMode.bind(this));
+    }
+
+    private onEnterPointingMode() {
+        this.isNodesVisible(false);
+    }
+
+    private onLeavePointingMode() {
+        this.isNodesVisible(true);
     }
 
     protected setSelected(selected: boolean): void {
@@ -88,7 +99,7 @@ export default class BoundaryBox extends Entity {
     }
 
     private handleStopMoving() {
-        this.isNodesVisible(true);
+        this.isNodesVisible(!this.context.__appState.keyboard.shiftPressed);
     }
 
     private createNodePositionsArray(x: number, y: number, width: number, height: number): Array<IdAndPositions> {
@@ -124,7 +135,7 @@ export default class BoundaryBox extends Entity {
             .attr('id', 'b-box')
             .attr('visibility', 'hidden')
             .attr('display', 'none')
-            .attr('stroke', '#096bc7')
+            .attr('stroke', this.context.COLORS.blue)
             .attr('fill', 'none')
             .attr('stroke-width', 2)
             .style('cursor', 'grab')
@@ -141,7 +152,7 @@ export default class BoundaryBox extends Entity {
             )
                 .attr('id', 'rsz-node')
                 .attr('class', `handle-resiz resize-${node.id}`)
-                .attr('fill', '#096bc7')
+                .attr('fill', this.context.COLORS.blue)
                 .attr('stroke', '#ffffff')
                 .attr('stroke-width', 1)
                 .attr('rx', 1)
@@ -242,9 +253,9 @@ export default class BoundaryBox extends Entity {
                 this.isDragging = false;
             });
 
-            
-            
-            this.renderService.selectAll<SVGGElement>('#rsz-node').call(resizingNodesDragHandler);
-            this.box.call(dragHandler);
+
+
+        this.renderService.selectAll<SVGGElement>('#rsz-node').call(resizingNodesDragHandler);
+        this.box.call(dragHandler);
     }
 }

@@ -20,5 +20,7 @@ export class Event {
 
     public static readonly global = {
         CONTAINER_CLICK: 220,
+        ENTER_POINTING_MODE: 221,
+        LEAVE_POINTING_MODE: 222,
     };
 }

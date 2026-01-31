@@ -1,7 +1,6 @@
-// import LumCard from "../../entities/LumCard";
-// import LumText from "../../entities/LumText";
-// import ResizingControll from "../../controllers/ResizingControll";
+import * as d3 from "d3";
 import RenderContext from "./RenderContext";
+import PrimitiveElementPayload from "../../entities/interfaces/PrimitiveElementPayload";
 
 export default class RenderService {
     public readonly context: RenderContext;
@@ -37,14 +36,14 @@ export default class RenderService {
         return rect;
     }
 
-    public drawPrimitiveLine(x: number, y: number, width: number, group?: D3GElementSelection): D3LineElementSelection {
+    public drawPrimitiveLine(startX: number, startY: number, endX: number, endY: number, group?: D3GElementSelection): D3LineElementSelection {
         const node = group ?? this.context.getCore();
 
         const line = node.append('line')
-            .attr('x1', x)
-            .attr('y1', y)
-            .attr('x2', width + x)
-            .attr('y2', y)
+            .attr('x1', startX)
+            .attr('y1', startY)
+            .attr('x2', endX)
+            .attr('y2', endY)
             .style("stroke", "#3d3d3dff")
             .style("stroke-width", 1);
 
@@ -69,6 +68,62 @@ export default class RenderService {
             .text(text);
 
         return textElement;
+    }
+
+    public rotatePathElement(elementPayload: PrimitiveElementPayload, rotation: number, addTransform = ''): D3PathElementSelection {
+        const { x, y, width, height, element } = elementPayload;
+
+        const centerX = x + width / 2;
+        const centerY = y + height / 2;
+
+        return element!.attr('transform', `${addTransform} rotate(${rotation}, ${centerX}, ${centerY})`);
+    }
+
+    public drawPrimitiveTriangle(options: PrimitiveElementPayload, pointingTo: string): D3PathElementSelection {
+        const { x, y, width, height, group } = options;
+
+        const trianglePath = this.drawPrimitivePath([
+            { x: x + width / 2, y: y },
+            { x: x, y: y + height },
+            { x: x + width, y: y + height }
+        ], group);
+
+        let rotation = 0;
+
+        switch (pointingTo) {
+            case 't': rotation = 0; break;
+            case 'r': rotation = 90; break;
+            case 'b': rotation = 180; break;
+            case 'l': rotation = 270; break;
+            default:
+                trianglePath.attr('fill', 'red');
+                rotation = 0;
+                break;
+        }
+
+        if (rotation !== 0) {
+            this.rotatePathElement({x, y, width, height, element: trianglePath}, rotation)
+        }
+
+        return trianglePath;
+    }
+
+    public drawPrimitivePath(points: { x: number, y: number }[], group?: D3GElementSelection, color = '#6d6d6d'): D3PathElementSelection {
+        const node = group ?? this.context.getCore();
+
+        const pathData = points.reduce((acc, { x, y }, i) => {
+            const command = i === 0 ? 'M' : 'L';
+            return `${acc} ${command} ${x} ${y}`;
+        }, '') + ' Z';
+
+        const path = node.append('path')
+            .attr("d", pathData)
+            .attr('fill', 'white')
+            .attr('stroke', color)
+            .attr('stroke-width', 2)
+            .style('stroke-linejoin', 'round');
+
+        return path;
     }
     /////////////////////////////////////////////////////////////////////////////////////
 

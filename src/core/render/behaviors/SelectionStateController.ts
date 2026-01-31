@@ -20,18 +20,21 @@ export default class SelectionStateController extends StateController {
 
         if (!entity) return;
 
-        if (this.context.__appState.keyboard.ctrlPressed) {
-            if (this.context.__appState.selectedEntities.includes(entity) && this.context.__appState.selectedEntities.length > 1) {
-                this.removeFromSelection(payload);
-                return;
-            }
-
-            this.addToSelection(entity);
-        } else {
-            if (!this.context.__appState.selectedEntities.includes(entity)) {
-                this.changeSelection(entity);
+        if(!this.context.__appState.keyboard.shiftPressed) {
+            if (this.context.__appState.keyboard.ctrlPressed) {
+                if (this.context.__appState.selectedEntities.includes(entity) && this.context.__appState.selectedEntities.length > 1) {
+                    this.removeFromSelection(payload);
+                    return;
+                }
+    
+                this.addToSelection(entity);
+            } else {
+                if (!this.context.__appState.selectedEntities.includes(entity)) {
+                    this.changeSelection(entity);
+                }
             }
         }
+
     }
 
     private handleContainerClick () {

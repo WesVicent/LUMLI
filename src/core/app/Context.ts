@@ -5,6 +5,10 @@ export default class Context {
     public __eventBus: EventBus;
     public __appState: AppState;
 
+    public readonly COLORS = {
+        blue: '#096bc7',
+    };
+
     constructor(eventBus: EventBus, appState: AppState) {
         this.__eventBus = eventBus;
         this.__appState = appState;

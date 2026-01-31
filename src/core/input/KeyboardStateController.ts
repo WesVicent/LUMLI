@@ -1,5 +1,6 @@
 import StateController from "../state/StateController";
 import Context from "../app/Context";
+import { Event } from "../event/EventNames";
 
 export default class KeyboardStateController extends StateController {
     constructor(context: Context) {
@@ -36,6 +37,10 @@ export default class KeyboardStateController extends StateController {
                 break;
             case 'Shift':
                 this.context.__appState.keyboard.shiftPressed = true;
+
+                if (this.context.__appState.selectedEntities.length === 1) {
+                    this.context.__eventBus.trigger(Event.global.ENTER_POINTING_MODE);
+                }
                 break;
             case 'Alt':
                 this.context.__appState.keyboard.altPressed = true;
@@ -55,6 +60,10 @@ export default class KeyboardStateController extends StateController {
                 break;
             case 'Shift':
                 this.context.__appState.keyboard.shiftPressed = false;
+
+                if (this.context.__appState.selectedEntities.length === 1) {
+                    this.context.__eventBus.trigger(Event.global.LEAVE_POINTING_MODE);
+                }
                 break;
             case 'Alt':
                 this.context.__appState.keyboard.altPressed = false;
