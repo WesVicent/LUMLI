@@ -9,6 +9,8 @@ export class Event {
         STOP_RESIZE: 6,
         CLICK_UP: 7,
         CLICK_DOWN: 8,
+        START_POINT: 9,
+        STOP_POINT: 10,
     };
 
     public static readonly selection = {

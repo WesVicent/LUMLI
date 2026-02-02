@@ -1,5 +1,5 @@
-import RenderContext from "./RenderContext";
-import PrimitiveElementPayload from "../../entities/interfaces/PrimitiveElementPayload";
+import RenderContext from './RenderContext';
+import PrimitiveElementPayload from '../../entities/interfaces/PrimitiveElementPayload';
 
 export default class RenderService {
     public readonly context: RenderContext;
@@ -12,10 +12,10 @@ export default class RenderService {
     //////////////////////////  PRIMITIVES  ///////////////////////////////      
     public createPrimitiveGroup(id: string, x: number, y: number, width: number, height: number): D3GElementSelection {
         return this.context.append<SVGGElement>('g')
-            .attr("transform", `translate(${x}, ${y})`)
+            .attr('transform', `translate(${x}, ${y})`)
             .attr('width', width)       // Maybe doesn't matter
             .attr('height', height)    // Maybe doesn't matter
-            .attr("id", id);
+            .attr('id', id);
 
     }
 
@@ -43,8 +43,8 @@ export default class RenderService {
             .attr('y1', startY)
             .attr('x2', endX)
             .attr('y2', endY)
-            .style("stroke", "#3d3d3dff")
-            .style("stroke-width", 1);
+            .style('stroke', '#3d3d3dff')
+            .style('stroke-width', 1);
 
         return line;
     }
@@ -73,7 +73,7 @@ export default class RenderService {
         const { x, y, element } = elementPayload;
 
         const transformationString = element?.attr('transform') || '' as string;
-        const baseTransform = transformationString.replace(/translate\([^\)]+\)/g, "").trim();
+        const baseTransform = transformationString.replace(/translate\([^\)]+\)/g, '').trim();
         const finalTransform = `translate(${x}, ${y}) ${baseTransform}`.trim();
 
         return element!.attr('transform', finalTransform);
@@ -101,8 +101,8 @@ export default class RenderService {
         return element!.attr('transform', newTransform.trim());
     }
 
-    public drawPrimitiveTriangle(options: PrimitiveElementPayload, pointingTo: string): D3PathElementSelection {
-        const { x, y, width, height, group } = options;
+    public drawPrimitiveTriangle(options: PrimitiveElementPayload): D3PathElementSelection {
+        const { width, height, group } = options;
 
         const trianglePath = this.drawPrimitivePath([
             { x: width / 2, y: 0 },
@@ -110,24 +110,8 @@ export default class RenderService {
             { x: width, y: height }
         ], group);
 
-        let rotation = 0;
-
-        switch (pointingTo) {
-            case 't': rotation = 0; break;
-            case 'r': rotation = 90; break;
-            case 'b': rotation = 180; break;
-            case 'l': rotation = 270; break;
-            default:
-                trianglePath.attr('fill', 'red');
-                rotation = 0;
-                break;
-        }
-
-        this.rotatePathElement({ x, y, width, height, element: trianglePath }, rotation)
-
         return trianglePath;
     }
-
 
     public drawPrimitivePath(points: { x: number, y: number }[], group?: D3GElementSelection, color = '#6d6d6d'): D3PathElementSelection {
         const node = group ?? this.context.getCore();
@@ -138,7 +122,7 @@ export default class RenderService {
         }, '') + ' Z';
 
         const path = node.append('path')
-            .attr("d", pathData)
+            .attr('d', pathData)
             .attr('fill', 'white')
             .attr('stroke', color)
             .attr('stroke-width', 2)

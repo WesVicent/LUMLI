@@ -1,11 +1,11 @@
-import * as d3 from "d3"; // TODO: remove from here
-import RenderService from "../../engines/d3/RenderService";
-import IdAndPositions from "../interfaces/IdAndPositions";
-import Entity from "../Entity";
-import EntityBase from "../types/EntityBase";
-import { Event } from "../../../event/EventNames";
-import EventPayload from "../../../event/types/EventPayload";
-import Context from "../../../app/Context";
+import * as d3 from 'd3'; // TODO: remove from here
+import RenderService from '../../engines/d3/RenderService';
+import IdAndPositions from '../interfaces/IdAndPositions';
+import Entity from '../Entity';
+import EntityBase from '../types/EntityBase';
+import { Event } from '../../../event/EventNames';
+import EventPayload from '../../../event/types/EventPayload';
+import Context from '../../../app/Context';
 
 export default class BoundaryBox extends Entity {
     private nodes: Array<IdAndPositions>;
@@ -37,7 +37,6 @@ export default class BoundaryBox extends Entity {
         
         this.context.__eventBus.listen(Event.selection.SELECT, this.handleSelectionChange.bind(this));
         this.context.__eventBus.listen(Event.selection.UNSELECT, this.handleSelectionChange.bind(this));
-        this.context.__eventBus.listen(Event.selection.CLEAR, this.onSelectionClear.bind(this));
         this.context.__eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
         this.context.__eventBus.listen(Event.entity.STOP_MOVEMENT, this.handleStopMoving.bind(this));
 
@@ -143,7 +142,7 @@ export default class BoundaryBox extends Entity {
             .attr('fill', 'none')
             .attr('stroke-width', 2)
             .style('cursor', 'grab')
-            .style("pointer-events", "all")
+            .style('pointer-events', 'all')
             .lower();
 
 
@@ -256,8 +255,6 @@ export default class BoundaryBox extends Entity {
                 this.dragStartPos = undefined as any;
                 this.isDragging = false;
             });
-
-
 
         this.renderService.selectAll<SVGGElement>('#rsz-node').call(resizingNodesDragHandler);
         this.box.call(dragHandler);

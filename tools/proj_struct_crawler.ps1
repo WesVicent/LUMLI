@@ -1,4 +1,4 @@
-$projectPath = ".."
+$projectPath = ".." # Run from path /tools
 
 $ignoreFolders = @("node_modules", ".git")
 

@@ -5,6 +5,7 @@ export default class RenderContext {
 
     public readonly hCenter: number
     public readonly vCenter: number
+    COLORS: any;
 
     constructor(svg: D3SVGElementSelection, width: number, height: number) {
         this.svg = svg;

@@ -16,10 +16,11 @@ type D3TextSpanElementSelection = D3Selection<SVGTSpanElement, unknown, HTMLElem
 
 type D3DragGroupEvent =  d3.D3DragEvent<SVGGElement, unknown, void>
 type D3DragRectEvent = d3.D3DragEvent<SVGRectElement, unknown, void>;
+type D3DragPathEvent = d3.D3DragEvent<SVGPathElement, unknown, void>;
 
 type D3DragRectBehavior = d3.DragBehavior<SVGRectElement, unknown, void>;
 type D3DragRectFunction = (selection: D3RectElementSelection) => void;
 
 type D3DragGroupFunction = (selection: D3GElementSelection) => void;
 
-type LumMultiDragEvent = D3DragGroupEvent | D3DragRectEvent;
+type LumMultiDragEvent = D3DragGroupEvent | D3DragRectEvent | D3DragPathEvent;

@@ -39,7 +39,7 @@ export default class LumCard extends Entity {
         this.height = height;
 
         this.text = new LumText(this.context, this.x, this.y, this.width, this.height, 18, text, this.renderService);
-        this.pointingNodes = new PointingNodes(this.context, this.x, this.y, this.width, this.height, this.renderService);
+        this.pointingNodes = new PointingNodes(this.context, this.id, this.x, this.y, this.width, this.height, this.renderService);
 
         // this.arrow = new LumArrow(this.context, 'asasasas', 100, 100, 200, 200, this.renderService);
     }

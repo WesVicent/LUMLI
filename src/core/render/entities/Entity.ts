@@ -28,6 +28,15 @@ export default abstract class Entity extends EntityBase {
     this.height = height;
   }
 
+  public abstract draw(): void;
+  
+  public abstract translate(x: number, y: number): void;
+  
+  public abstract transform(x: number, y: number, width: number, height: number): void;
+
+  public abstract setSelected(selected: boolean): void;
+
+
   protected emitClickUp(event?: LumMultiDragEvent) {
     this.emit(Event.entity.CLICK_UP, new EventPayload(event as D3DragGroupEvent | undefined, this));
   }  
@@ -44,7 +53,6 @@ export default abstract class Entity extends EntityBase {
   }
 
   protected onUnselected(payload: EventPayload) {    
-    
     if ((payload.target as Entity)?.id === this.id) {
       this.isSelected = false;
       this.setSelected(false);
@@ -55,19 +63,7 @@ export default abstract class Entity extends EntityBase {
     this.isSelected = false;
     this.setSelected(false);
   }
-
-  private emit(event: number, data: any) {
-    this.context.__eventBus.trigger(event, { entityId: this.id, ...data });
-  }
   
-  public abstract draw(): void;
-  
-  public abstract translate(x: number, y: number): void;
-  
-  public abstract transform(x: number, y: number, width: number, height: number): void;
-
-  public abstract setSelected(selected: boolean): void;
-
   protected emitStartMove(payload: EventPayload) {
     this.emit(Event.entity.START_MOVEMENT, payload);
   }
@@ -94,5 +90,9 @@ export default abstract class Entity extends EntityBase {
 
   protected emitStopResize(payload: EventPayload) {
     this.emit(Event.entity.STOP_RESIZE, payload);
+  }
+  
+  protected emit(event: number, data: any) {
+    this.context.__eventBus.trigger(event, { entityId: this.id, ...data });
   }
 }
