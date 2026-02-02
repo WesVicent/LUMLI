@@ -26,10 +26,6 @@ export default abstract class Entity extends EntityBase {
     this.y = y;
     this.width = width;
     this.height = height;
-
-    this.context.__eventBus.listen(Event.selection.SELECT, this.onSelected.bind(this));
-    this.context.__eventBus.listen(Event.selection.UNSELECT, this.onUnselected.bind(this));
-    this.context.__eventBus.listen(Event.selection.CLEAR, this.onSelectionClear.bind(this));
   }
 
   protected emitClickUp(event?: LumMultiDragEvent) {
@@ -40,15 +36,14 @@ export default abstract class Entity extends EntityBase {
     this.emit(Event.entity.CLICK_DOWN, new EventPayload(event as D3DragGroupEvent | undefined, this));
   }
 
-  private onSelected(payload: EventPayload) {        
-     
+  protected onSelected(payload: EventPayload) {
     if ((payload.target as Entity)?.id === this.id) {
       this.isSelected = true;
       this.setSelected(true);
     }
   }
 
-  private onUnselected(payload: EventPayload) {    
+  protected onUnselected(payload: EventPayload) {    
     
     if ((payload.target as Entity)?.id === this.id) {
       this.isSelected = false;
@@ -56,7 +51,7 @@ export default abstract class Entity extends EntityBase {
     }
   }
 
-  private onSelectionClear() {    
+  protected onSelectionClear() {    
     this.isSelected = false;
     this.setSelected(false);
   }
@@ -67,11 +62,11 @@ export default abstract class Entity extends EntityBase {
   
   public abstract draw(): void;
   
-  abstract translate(x: number, y: number): void;
+  public abstract translate(x: number, y: number): void;
   
   public abstract transform(x: number, y: number, width: number, height: number): void;
 
-  protected abstract setSelected(selected: boolean): void;
+  public abstract setSelected(selected: boolean): void;
 
   protected emitStartMove(payload: EventPayload) {
     this.emit(Event.entity.START_MOVEMENT, payload);

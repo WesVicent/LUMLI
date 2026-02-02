@@ -27,13 +27,17 @@ export default class BoundaryBox extends Entity {
         left: 'left',
     };
 
-    constructor(context: Context, id: string, x: number, y: number, width: number, height: number, renderService: RenderService) {
+    constructor(context: Context, id: string, renderService: RenderService, x?: number, y?: number, width?: number, height?: number) {
+        x = x || 0; y = y || 0; width = width || 0; height = height || 0;
+
         super(context, id, x, y, width, height, renderService);
 
         this.nodes = this.createNodePositionsArray(x, y, width, height);
 
+        
         this.context.__eventBus.listen(Event.selection.SELECT, this.handleSelectionChange.bind(this));
         this.context.__eventBus.listen(Event.selection.UNSELECT, this.handleSelectionChange.bind(this));
+        this.context.__eventBus.listen(Event.selection.CLEAR, this.onSelectionClear.bind(this));
         this.context.__eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
         this.context.__eventBus.listen(Event.entity.STOP_MOVEMENT, this.handleStopMoving.bind(this));
 
@@ -49,7 +53,7 @@ export default class BoundaryBox extends Entity {
         this.isNodesVisible(true);
     }
 
-    protected setSelected(selected: boolean): void {
+    public setSelected(selected: boolean): void {
         this.isSelected = selected;
     }
 

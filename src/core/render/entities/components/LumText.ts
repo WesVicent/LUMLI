@@ -80,5 +80,5 @@ export default class LumText extends Entity {
         }
     }
 
-    protected setSelected(): void { }
+    public setSelected(): void { }
 }

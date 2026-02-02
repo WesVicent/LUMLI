@@ -1,26 +1,22 @@
 import * as d3 from "d3";
 import RenderService from "../../engines/d3/RenderService";
-// import LumText from "./LumText";
 import EntityBase from "../types/EntityBase";
 import Entity from "../Entity";
 import EventPayload from "../../../event/types/EventPayload";
 import Context from "../../../app/Context";
 import LumText from "./LumText";
-import LumArrow from "./LumArrow";
+// import LumArrow from "./LumArrow";
 import { Event } from "../../../event/EventNames";
-import PrimitiveElementPayload from "../interfaces/PrimitiveElementPayload";
+import PointingNodes from "../GUI/PointingNodes";
 
 export default class LumCard extends Entity {
     public localGroup!: D3GElementSelection;
 
-    private readonly POINTING_NODES_SIZE = 8;
-
-    private pointingNodes!: { top: PrimitiveElementPayload, right: PrimitiveElementPayload, bottom: PrimitiveElementPayload, left: PrimitiveElementPayload };
-
     private rect!: D3RectElementSelection;
     private line!: D3LineElementSelection;
     private text: LumText;
-    private arrow!: LumArrow;
+    private pointingNodes: PointingNodes;
+    // private arrow!: LumArrow;
 
     private dragStartPos!: { x: number, y: number };
     private isDragging = false;
@@ -32,6 +28,10 @@ export default class LumCard extends Entity {
     constructor(context: Context, id: string, x: number, y: number, width: number, height: number, text: string, renderService: RenderService) {
         super(context, id, x, y, width, height, renderService);
 
+        this.context.__eventBus.listen(Event.selection.SELECT, this.onSelected.bind(this));
+        this.context.__eventBus.listen(Event.selection.UNSELECT, this.onUnselected.bind(this));
+        this.context.__eventBus.listen(Event.selection.CLEAR, this.onSelectionClear.bind(this));
+
         width = width < this.MIN_WIDTH ? this.MIN_WIDTH : width;
         height = height < this.MIN_HEIGHT ? this.MIN_HEIGHT : height;
 
@@ -39,24 +39,9 @@ export default class LumCard extends Entity {
         this.height = height;
 
         this.text = new LumText(this.context, this.x, this.y, this.width, this.height, 18, text, this.renderService);
+        this.pointingNodes = new PointingNodes(this.context, this.x, this.y, this.width, this.height, this.renderService);
+
         // this.arrow = new LumArrow(this.context, 'asasasas', 100, 100, 200, 200, this.renderService);
-
-        context.__eventBus.listen(Event.global.ENTER_POINTING_MODE, this.onEnterPointingMode.bind(this));
-        context.__eventBus.listen(Event.global.LEAVE_POINTING_MODE, this.onLeavePointingMode.bind(this));
-    }
-
-    private onEnterPointingMode() {
-        this.pointingNodes.top.element?.attr('display', 'block');
-        this.pointingNodes.right.element?.attr('display', 'block');
-        this.pointingNodes.bottom.element?.attr('display', 'block');
-        this.pointingNodes.left.element?.attr('display', 'block');
-    }
-
-    private onLeavePointingMode() {
-        this.pointingNodes.top.element?.attr('display', 'none');
-        this.pointingNodes.right.element?.attr('display', 'none');
-        this.pointingNodes.bottom.element?.attr('display', 'none');
-        this.pointingNodes.left.element?.attr('display', 'none');
     }
 
     public draw(): void {
@@ -66,107 +51,17 @@ export default class LumCard extends Entity {
 
         this.line = this.renderService.drawPrimitiveLine(0, this.height / 5, this.width, this.height / 5, this.localGroup);
 
+        this.text.draw(this.localGroup);
+
+        this.pointingNodes.draw(this.localGroup);
+
+        // this.arrow.draw();
+
         // GRID ref
         // this.renderService.drawPrimitiveLine(0, this.height / 2, this.width, this.height / 2, this.localGroup).style('stroke', '#7b00ff');
         // this.renderService.drawPrimitiveLine(this.width / 2, 0, this.width / 2, this.height, this.localGroup).style('stroke', '#7b00ff');
 
-        this.text.draw(this.localGroup);
-
-        // this.arrow.draw();
-
-        this.drawPointingNodes();
         this.setupDragHandler();
-    }
-
-    private drawPointingNodes(): void {
-        const trianglesPayload = this.mountTrianglePayloads();
-
-        this.pointingNodes = {
-            top: { ...trianglesPayload.top, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.top, 'b').attr("stroke", this.context.COLORS.blue).attr("fill", this.context.COLORS.white).attr("display", "none") },
-            right: { ...trianglesPayload.right, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.right, 'l').attr("stroke", this.context.COLORS.blue).attr("fill", this.context.COLORS.white).attr("display", "none") },
-            bottom: { ...trianglesPayload.bottom, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.bottom, 't').attr("stroke", this.context.COLORS.blue).attr("fill", this.context.COLORS.white).attr("display", "none") },
-            left: { ...trianglesPayload.left, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.left, 'r').attr("stroke", this.context.COLORS.blue).attr("fill", this.context.COLORS.white).attr("display", "none") },
-        };
-    }
-
-    private flipPointingNodes(flip: boolean): void {
-        let offset = this.POINTING_NODES_SIZE;
-        const updatedTrianglePayloads = this.mountTrianglePayloads();
-        
-        if (flip) {
-            updatedTrianglePayloads.top.y -= offset;
-            updatedTrianglePayloads.right.x += offset;
-            updatedTrianglePayloads.bottom.y += offset;
-            updatedTrianglePayloads.left.x -= offset;
-
-            this.renderService.rotatePathElement(updatedTrianglePayloads.top, 0).attr("fill", this.context.COLORS.blue);
-            this.renderService.rotatePathElement(updatedTrianglePayloads.right, 90).attr("fill", this.context.COLORS.blue);
-            this.renderService.rotatePathElement(updatedTrianglePayloads.bottom, 180).attr("fill", this.context.COLORS.blue);
-            this.renderService.rotatePathElement(updatedTrianglePayloads.left, 270,).attr("fill", this.context.COLORS.blue);
-
-            return;
-        }
-
-        this.renderService.rotatePathElement(updatedTrianglePayloads.top, 180).attr("fill", "transparent");
-        this.renderService.rotatePathElement(updatedTrianglePayloads.right, 270).attr("fill", "transparent");
-        this.renderService.rotatePathElement(updatedTrianglePayloads.bottom, 0).attr("fill", "transparent");
-        this.renderService.rotatePathElement(updatedTrianglePayloads.left, 90).attr("fill", "transparent");
-    }
-
-    private transformPointingNodes(): void {
-        let offset = this.POINTING_NODES_SIZE;
-        const updatedTrianglePayloads = this.mountTrianglePayloads();
-
-        if(this.isSelected) {
-            updatedTrianglePayloads.top.y -= offset;
-            updatedTrianglePayloads.right.x += offset;
-            updatedTrianglePayloads.bottom.y += offset;
-            updatedTrianglePayloads.left.x -= offset;
-        }
-
-        this.renderService.translateElement(updatedTrianglePayloads.top);
-        this.renderService.translateElement(updatedTrianglePayloads.right);
-        this.renderService.translateElement(updatedTrianglePayloads.bottom);
-        this.renderService.translateElement(updatedTrianglePayloads.left);
-    }
-
-    private mountTrianglePayloads(): { top: PrimitiveElementPayload, right: PrimitiveElementPayload, bottom: PrimitiveElementPayload, left: PrimitiveElementPayload } {
-        const nodesHalfSize = this.POINTING_NODES_SIZE / 2;
-
-        return {
-            top: {
-                x: this.width / 2 - nodesHalfSize,
-                y: 0,
-                width: this.POINTING_NODES_SIZE,
-                height: this.POINTING_NODES_SIZE,
-                element: this.pointingNodes?.top.element,
-                group: this.localGroup,
-            },
-            right: {
-                x: this.width - this.POINTING_NODES_SIZE,
-                y: this.height / 2 - nodesHalfSize,
-                width: this.POINTING_NODES_SIZE,
-                height: this.POINTING_NODES_SIZE,
-                element: this.pointingNodes?.right.element,
-                group: this.localGroup
-            },
-            bottom: {
-                x: this.width / 2 - nodesHalfSize,
-                y: this.height - this.POINTING_NODES_SIZE,
-                width: this.POINTING_NODES_SIZE,
-                height: this.POINTING_NODES_SIZE,
-                element: this.pointingNodes?.bottom.element,
-                group: this.localGroup
-            },
-            left: {
-                x: 0,
-                y: this.height / 2 - nodesHalfSize,
-                width: this.POINTING_NODES_SIZE,
-                height: this.POINTING_NODES_SIZE,
-                element: this.pointingNodes?.left.element,
-                group: this.localGroup
-            },
-        };
     }
 
     public remove() {
@@ -194,8 +89,7 @@ export default class LumCard extends Entity {
             .attr('y2', this.height - (this.height - 20));
 
         this.text.transform(x, y, width, height);
-
-        this.transformPointingNodes();
+        this.pointingNodes.transform(x, y, width, height);
     }
 
     public getPositionAndSize(): EntityBase {
@@ -260,11 +154,9 @@ export default class LumCard extends Entity {
             .call(dragHandler);
     }
 
-    protected setSelected(selected: boolean): void {
+    public setSelected(selected: boolean): void {
         this.highlightBorders(selected);
-        this.flipPointingNodes(selected);
-
-        if (!selected) this.onLeavePointingMode();
+        this.pointingNodes.setSelected(selected);
     }
 
     public translate(x: number, y: number): void {

@@ -46,7 +46,7 @@ class Lum {
             new LumCard(appContext, 'card-2', X_POS, Y_POS, WIDHT, HEIGHT, 'a fucking', renderService),
             new LumCard(appContext, 'card-3', X_POS + WIDHT, Y_POS + HEIGHT, WIDHT, HEIGHT, 'card element', renderService),
 
-            new BoundaryBox(appContext, 'b-box', 0, 0, 0, 0, renderService),
+            new BoundaryBox(appContext, 'b-box', renderService),
         ];
 
         entities.forEach(entity => {

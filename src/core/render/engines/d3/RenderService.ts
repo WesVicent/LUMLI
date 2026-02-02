@@ -1,4 +1,3 @@
-import * as d3 from "d3";
 import RenderContext from "./RenderContext";
 import PrimitiveElementPayload from "../../entities/interfaces/PrimitiveElementPayload";
 
@@ -83,7 +82,7 @@ export default class RenderService {
     public rotatePathElement(elementPayload: PrimitiveElementPayload, rotation: number, addTransform = ''): D3PathElementSelection {
         let { width, height, element } = elementPayload;
 
-        this.translateElement(elementPayload);
+        this.translateElement(elementPayload); // To keep positions
 
         const centerX = width / 2;
         const centerY = height / 2;
