@@ -6,6 +6,7 @@ export default class Context {
     public __appState: AppState;
 
     public readonly COLORS = {
+        white: '#ffffff',
         blue: '#096bc7',
     };
 

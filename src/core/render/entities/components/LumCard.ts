@@ -63,8 +63,15 @@ export default class LumCard extends Entity {
         this.localGroup = this.renderService.createPrimitiveGroup(this.id, this.x, this.y, this.width, this.height);
 
         this.rect = this.renderService.drawPrimitiveRect(0, 0, this.width, this.height, this.localGroup);
-        this.line = this.renderService.drawPrimitiveLine(0, 0 + this.height / 5, this.width, this.height / 5, this.localGroup);
+
+        this.line = this.renderService.drawPrimitiveLine(0, this.height / 5, this.width, this.height / 5, this.localGroup);
+
+        // GRID ref
+        // this.renderService.drawPrimitiveLine(0, this.height / 2, this.width, this.height / 2, this.localGroup).style('stroke', '#7b00ff');
+        // this.renderService.drawPrimitiveLine(this.width / 2, 0, this.width / 2, this.height, this.localGroup).style('stroke', '#7b00ff');
+
         this.text.draw(this.localGroup);
+
         // this.arrow.draw();
 
         this.drawPointingNodes();
@@ -74,81 +81,89 @@ export default class LumCard extends Entity {
     private drawPointingNodes(): void {
         const trianglesPayload = this.mountTrianglePayloads();
 
-        console.log('trianglePayloads------1', trianglesPayload);
-
-
         this.pointingNodes = {
-            top: { ...trianglesPayload.top, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.top, 'b').attr("stroke", this.context.COLORS.blue).attr("display", "none") },
-            right: { ...trianglesPayload.right, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.right, 'l').attr("stroke", this.context.COLORS.blue).attr("display", "none") },
-            bottom: { ...trianglesPayload.bottom, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.bottom, 't').attr("stroke", this.context.COLORS.blue).attr("display", "none") },
-            left: { ...trianglesPayload.left, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.left, 'r').attr("stroke", this.context.COLORS.blue).attr("display", "none") },
+            top: { ...trianglesPayload.top, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.top, 'b').attr("stroke", this.context.COLORS.blue).attr("fill", this.context.COLORS.white).attr("display", "none") },
+            right: { ...trianglesPayload.right, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.right, 'l').attr("stroke", this.context.COLORS.blue).attr("fill", this.context.COLORS.white).attr("display", "none") },
+            bottom: { ...trianglesPayload.bottom, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.bottom, 't').attr("stroke", this.context.COLORS.blue).attr("fill", this.context.COLORS.white).attr("display", "none") },
+            left: { ...trianglesPayload.left, element: this.renderService.drawPrimitiveTriangle(trianglesPayload.left, 'r').attr("stroke", this.context.COLORS.blue).attr("fill", this.context.COLORS.white).attr("display", "none") },
         };
     }
 
     private flipPointingNodes(flip: boolean): void {
+        let offset = this.POINTING_NODES_SIZE;
+        const updatedTrianglePayloads = this.mountTrianglePayloads();
+        
         if (flip) {
-            this.renderService.rotatePathElement(this.pointingNodes.top, 0, `translate(0, ${this.pointingNodes.top.y - this.POINTING_NODES_SIZE})`).attr("fill", this.context.COLORS.blue);
-            this.renderService.rotatePathElement(this.pointingNodes.right, 90, `translate(${this.POINTING_NODES_SIZE}, 0)`).attr("fill", this.context.COLORS.blue);
-            this.renderService.rotatePathElement(this.pointingNodes.bottom, 180, `translate(0, ${this.POINTING_NODES_SIZE})`).attr("fill", this.context.COLORS.blue);
-            this.renderService.rotatePathElement(this.pointingNodes.left, 270, `translate(${this.pointingNodes.left.x - this.POINTING_NODES_SIZE}, 0)`).attr("fill", this.context.COLORS.blue);
+            updatedTrianglePayloads.top.y -= offset;
+            updatedTrianglePayloads.right.x += offset;
+            updatedTrianglePayloads.bottom.y += offset;
+            updatedTrianglePayloads.left.x -= offset;
+
+            this.renderService.rotatePathElement(updatedTrianglePayloads.top, 0).attr("fill", this.context.COLORS.blue);
+            this.renderService.rotatePathElement(updatedTrianglePayloads.right, 90).attr("fill", this.context.COLORS.blue);
+            this.renderService.rotatePathElement(updatedTrianglePayloads.bottom, 180).attr("fill", this.context.COLORS.blue);
+            this.renderService.rotatePathElement(updatedTrianglePayloads.left, 270,).attr("fill", this.context.COLORS.blue);
+
             return;
         }
 
-        this.renderService.rotatePathElement(this.pointingNodes.top, 180).attr("fill", "transparent");
-        this.renderService.rotatePathElement(this.pointingNodes.right, 270).attr("fill", "transparent");
-        this.renderService.rotatePathElement(this.pointingNodes.bottom, 0).attr("fill", "transparent");
-        this.renderService.rotatePathElement(this.pointingNodes.left, 90).attr("fill", "transparent");
+        this.renderService.rotatePathElement(updatedTrianglePayloads.top, 180).attr("fill", "transparent");
+        this.renderService.rotatePathElement(updatedTrianglePayloads.right, 270).attr("fill", "transparent");
+        this.renderService.rotatePathElement(updatedTrianglePayloads.bottom, 0).attr("fill", "transparent");
+        this.renderService.rotatePathElement(updatedTrianglePayloads.left, 90).attr("fill", "transparent");
     }
 
-    private transformPointingNodes(): void { // TODO
-        const trianglePayloads = this.mountTrianglePayloads();
+    private transformPointingNodes(): void {
+        let offset = this.POINTING_NODES_SIZE;
+        const updatedTrianglePayloads = this.mountTrianglePayloads();
 
-        console.log('trianglePayloads', trianglePayloads);
-        
+        if(this.isSelected) {
+            updatedTrianglePayloads.top.y -= offset;
+            updatedTrianglePayloads.right.x += offset;
+            updatedTrianglePayloads.bottom.y += offset;
+            updatedTrianglePayloads.left.x -= offset;
+        }
 
-        Object.keys(this.pointingNodes).forEach((node) => {
-            let transformationString = this.pointingNodes[node as keyof typeof this.pointingNodes].element?.attr('transform') as string;
-
-            console.log(this.pointingNodes[node as keyof typeof this.pointingNodes].element?.attr('transform') as string);
-
-            const baseTransform = transformationString.replace(/translate\([^\)]+\)/g, "").trim();
-
-            const finalTransform = `translate(${trianglePayloads[node as keyof typeof trianglePayloads].x}, ${trianglePayloads[node as keyof typeof trianglePayloads].y}) ${baseTransform}`.trim();
-
-            this.pointingNodes[node as keyof typeof this.pointingNodes].element?.attr('transform', finalTransform);
-
-            console.log(node, this.pointingNodes[node as keyof typeof this.pointingNodes].element?.attr('transform') as string);
-        });
+        this.renderService.translateElement(updatedTrianglePayloads.top);
+        this.renderService.translateElement(updatedTrianglePayloads.right);
+        this.renderService.translateElement(updatedTrianglePayloads.bottom);
+        this.renderService.translateElement(updatedTrianglePayloads.left);
     }
 
     private mountTrianglePayloads(): { top: PrimitiveElementPayload, right: PrimitiveElementPayload, bottom: PrimitiveElementPayload, left: PrimitiveElementPayload } {
+        const nodesHalfSize = this.POINTING_NODES_SIZE / 2;
+
         return {
             top: {
-                x: this.width / 2 - this.POINTING_NODES_SIZE / 2,
+                x: this.width / 2 - nodesHalfSize,
                 y: 0,
                 width: this.POINTING_NODES_SIZE,
                 height: this.POINTING_NODES_SIZE,
-                group: this.localGroup
+                element: this.pointingNodes?.top.element,
+                group: this.localGroup,
             },
             right: {
                 x: this.width - this.POINTING_NODES_SIZE,
-                y: this.height / 2 - this.POINTING_NODES_SIZE / 2,
+                y: this.height / 2 - nodesHalfSize,
                 width: this.POINTING_NODES_SIZE,
                 height: this.POINTING_NODES_SIZE,
+                element: this.pointingNodes?.right.element,
                 group: this.localGroup
             },
             bottom: {
-                x: this.width / 2 - this.POINTING_NODES_SIZE / 2,
+                x: this.width / 2 - nodesHalfSize,
                 y: this.height - this.POINTING_NODES_SIZE,
                 width: this.POINTING_NODES_SIZE,
                 height: this.POINTING_NODES_SIZE,
+                element: this.pointingNodes?.bottom.element,
                 group: this.localGroup
             },
             left: {
                 x: 0,
-                y: this.height / 2 - this.POINTING_NODES_SIZE / 2,
+                y: this.height / 2 - nodesHalfSize,
                 width: this.POINTING_NODES_SIZE,
                 height: this.POINTING_NODES_SIZE,
+                element: this.pointingNodes?.left.element,
                 group: this.localGroup
             },
         };
@@ -248,6 +263,8 @@ export default class LumCard extends Entity {
     protected setSelected(selected: boolean): void {
         this.highlightBorders(selected);
         this.flipPointingNodes(selected);
+
+        if (!selected) this.onLeavePointingMode();
     }
 
     public translate(x: number, y: number): void {

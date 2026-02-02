@@ -70,22 +70,45 @@ export default class RenderService {
         return textElement;
     }
 
+    public translateElement(elementPayload: PrimitiveElementPayload): D3PathElementSelection {
+        const { x, y, element } = elementPayload;
+
+        const transformationString = element?.attr('transform') || '' as string;
+        const baseTransform = transformationString.replace(/translate\([^\)]+\)/g, "").trim();
+        const finalTransform = `translate(${x}, ${y}) ${baseTransform}`.trim();
+
+        return element!.attr('transform', finalTransform);
+    }
+
     public rotatePathElement(elementPayload: PrimitiveElementPayload, rotation: number, addTransform = ''): D3PathElementSelection {
-        const { x, y, width, height, element } = elementPayload;
+        let { width, height, element } = elementPayload;
 
-        const centerX = x + width / 2;
-        const centerY = y + height / 2;
+        this.translateElement(elementPayload);
 
-        return element!.attr('transform', `${addTransform} rotate(${rotation}, ${centerX}, ${centerY})`);
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        const currentTransform = element?.attr('transform') || '';
+        const transformWithoutRotation = currentTransform.replace(/rotate\([^)]+\)/g, '').trim();
+
+        let newTransform = transformWithoutRotation;
+
+        if (addTransform) {
+            newTransform += ` ${addTransform}`;
+        }
+
+        newTransform += ` rotate(${rotation}, ${centerX}, ${centerY})`;
+
+        return element!.attr('transform', newTransform.trim());
     }
 
     public drawPrimitiveTriangle(options: PrimitiveElementPayload, pointingTo: string): D3PathElementSelection {
         const { x, y, width, height, group } = options;
 
         const trianglePath = this.drawPrimitivePath([
-            { x: x + width / 2, y: y },
-            { x: x, y: y + height },
-            { x: x + width, y: y + height }
+            { x: width / 2, y: 0 },
+            { x: 0, y: height },
+            { x: width, y: height }
         ], group);
 
         let rotation = 0;
@@ -101,12 +124,11 @@ export default class RenderService {
                 break;
         }
 
-        if (rotation !== 0) {
-            this.rotatePathElement({x, y, width, height, element: trianglePath}, rotation)
-        }
+        this.rotatePathElement({ x, y, width, height, element: trianglePath }, rotation)
 
         return trianglePath;
     }
+
 
     public drawPrimitivePath(points: { x: number, y: number }[], group?: D3GElementSelection, color = '#6d6d6d'): D3PathElementSelection {
         const node = group ?? this.context.getCore();
