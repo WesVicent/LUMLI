@@ -139,6 +139,24 @@ export default class PointingNodes extends Entity {
                     .style('cursor', 'crosshair')
             },
         };
+
+        this.setupDragHandler();
+    }
+
+    private setupDragHandler() {
+        const resizingNodesDragHandler = d3.drag<SVGPathElement, unknown, void>()
+        
+            .on('start', (event: d3.D3DragEvent<SVGPathElement, unknown, void>) => {
+                this.emit(Event.entity.START_POINT, new EventPayload(event, this));
+            })
+            .on('drag', (event: d3.D3DragEvent<SVGPathElement, unknown, void>) => {
+                // TODO:
+            })
+            .on('end', (event: d3.D3DragEvent<SVGPathElement, unknown, void>) => {
+                this.emit(Event.entity.STOP_POINT, new EventPayload(event, this));
+            });
+
+        this.renderService.selectAll<SVGPathElement>(`#${this.id}`).call(resizingNodesDragHandler);
     }
 
     public transform(x: number, y: number, width: number, height: number): void {

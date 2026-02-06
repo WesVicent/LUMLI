@@ -1,5 +1,4 @@
 import { EventBus } from "../event/EventBus";
-import EventPayload from "../event/types/EventPayload";
 import AppState from "../state/AppState";
 
 export default class Context {
@@ -16,7 +15,7 @@ export default class Context {
         this.__appState = appState;
     }
 
-    public storeInitialStates(payload: EventPayload): void {
+    public storeInitialStates(): void {
         const selected = this.__appState.selectedEntities;
         this.__appState.initialEntityStates.clear();
 
@@ -36,13 +35,8 @@ export default class Context {
             width: maxX - minX,
             height: maxY - minY,
             right: maxX,
-            bottom: maxY,
-            eventX: payload.event!.x,
-            eventY: payload.event!.y
+            bottom: maxY
         };
-
-        console.log(this.__appState.initialBoundaryBox);
-        
 
         selected.forEach(entity => {
             const relativeX = entity.x - this.__appState.initialBoundaryBox!.x;
@@ -58,7 +52,5 @@ export default class Context {
                 relativeY: relativeY
             });
         });
-
-        console.log(this.__appState.initialEntityStates.get(this.__appState.selectedEntities[0].id));
     }
 }

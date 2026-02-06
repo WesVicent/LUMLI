@@ -44,7 +44,7 @@ export default class ResizingStateController extends StateController {
             .find(className => className.startsWith('resize-'))
             ?.replace('resize-', '') || null;
 
-        this.context.storeInitialStates(payload);
+        this.context.storeInitialStates();
     }
 
     private handleOnResizing(payload: EventPayload) {
@@ -127,14 +127,12 @@ export default class ResizingStateController extends StateController {
     private resizeRight(payload: EventPayload, selected: Entity[]): void {
         if (!this.context.__appState.initialBoundaryBox) return;
 
-        const deltaX = payload.event!.dx - this.context.__appState.initialBoundaryBox.eventX;
+        const deltaX = payload.event!.x - this.context.__appState.initialBoundaryBox.right;
         const scaleX = 1 + (deltaX / this.context.__appState.initialBoundaryBox.width);
 
         selected.forEach(entity => {
             const initialState = this.context.__appState.initialEntityStates.get(entity.id);
             if (!initialState) return;
-
-            
 
             if(initialState.width * scaleX >= this.MIN_WIDTH) { 
                 entity.x = this.context.__appState.initialBoundaryBox!.x + (initialState.relativeX * scaleX);
@@ -146,7 +144,7 @@ export default class ResizingStateController extends StateController {
     private resizeLeft(payload: EventPayload, selected: Entity[]): void {
         if (!this.context.__appState.initialBoundaryBox) return;
 
-        const deltaX = payload.event!.x - this.context.__appState.initialBoundaryBox.x; // eventX flick on resize :,(
+        const deltaX = payload.event!.x - this.context.__appState.initialBoundaryBox.x;
         const scaleX = 1 - (deltaX / this.context.__appState.initialBoundaryBox.width);
 
         selected.forEach(entity => {
