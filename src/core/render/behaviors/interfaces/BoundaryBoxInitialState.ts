@@ -5,4 +5,6 @@ export default interface BoundaryBoxInitialState {
     height: number;
     right: number;
     bottom: number;
+    eventX: number;
+    eventY: number;
 }

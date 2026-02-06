@@ -6,14 +6,19 @@ import EntityBase from '../types/EntityBase';
 import { Event } from '../../../event/EventNames';
 import EventPayload from '../../../event/types/EventPayload';
 import Context from '../../../app/Context';
+import PointingNodes from './PointingNodes';
+import LumCard from '../components/LumCard';
 
 export default class BoundaryBox extends Entity {
-    private nodes: Array<IdAndPositions>;
+    private nodesPositionsArray: IdAndPositions[];
 
     private dragStartPos!: { x: number, y: number };
     private isDragging = false;
 
     private box!: D3RectElementSelection;
+    private nodes: D3RectElementSelection[];
+
+    private pointingNodes: PointingNodes;
 
     private readonly RESIZING_NODES_SIZE: number = 8;
     private readonly RESIZING_NODES_CLASS_SULFIX = {
@@ -32,9 +37,10 @@ export default class BoundaryBox extends Entity {
 
         super(context, id, x, y, width, height, renderService);
 
-        this.nodes = this.createNodePositionsArray(x, y, width, height);
+        this.nodes = [];
+        this.nodesPositionsArray = this.createNodePositionsArray(x, y, width, height);
+        this.pointingNodes = new PointingNodes(this.context, this.id, this.x, this.y, this.width, this.height, this.renderService);
 
-        
         this.context.__eventBus.listen(Event.selection.SELECT, this.handleSelectionChange.bind(this));
         this.context.__eventBus.listen(Event.selection.UNSELECT, this.handleSelectionChange.bind(this));
         this.context.__eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
@@ -54,16 +60,30 @@ export default class BoundaryBox extends Entity {
 
     public setSelected(selected: boolean): void {
         this.isSelected = selected;
+
+        this.pointingNodes.setSelected(selected);
     }
 
     public transform(x: number, y: number, width: number, height: number): void {
         this.width = width;
         this.height = height;
         this.translate(x, y);
+
+        // this.pointingNodes.transform(x, y, width, height);
     }
 
     private handleSelectionChange(payload: EventPayload): void {
-        const target = payload.target as EntityBase;
+        const target = payload.target as LumCard;
+
+        const group = target.localGroup;
+
+        group.append(() => { return this.box.node() });
+
+        this.nodes.forEach((node: D3RectElementSelection) => {
+            node.remove();
+            group.append(() => { return node.node() });
+        });
+
 
         if (target) {
             this.transform(target.x, target.y, target.width, target.height);
@@ -146,13 +166,8 @@ export default class BoundaryBox extends Entity {
             .lower();
 
 
-        this.nodes.forEach(node => {
-            this.renderService.drawPrimitiveRect(
-                node.x - this.RESIZING_NODES_SIZE / 2,
-                node.y - this.RESIZING_NODES_SIZE / 2,
-                this.RESIZING_NODES_SIZE,
-                this.RESIZING_NODES_SIZE,
-            )
+        this.nodesPositionsArray.forEach(node => {
+            this.nodes.push(this.renderService.drawPrimitiveRect(node.x - this.RESIZING_NODES_SIZE / 2, node.y - this.RESIZING_NODES_SIZE / 2, this.RESIZING_NODES_SIZE, this.RESIZING_NODES_SIZE)
                 .attr('id', 'rsz-node')
                 .attr('class', `handle-resiz resize-${node.id}`)
                 .attr('fill', this.context.COLORS.blue)
@@ -160,8 +175,10 @@ export default class BoundaryBox extends Entity {
                 .attr('stroke-width', 1)
                 .attr('rx', 1)
                 .attr('display', 'none')
-                .style('cursor', this.getResizeCursor(node.id));
+                .style('cursor', this.getResizeCursor(node.id)));
         });
+
+        // this.pointingNodes.draw(this.localGroup);
 
         this.setupDragHandler();
     }
@@ -170,20 +187,16 @@ export default class BoundaryBox extends Entity {
         this.x = x || this.x;
         this.y = y || this.y;
 
-        this.renderService.select<SVGRectElement>('#b-box')
-            .attr('x', this.x)
-            .attr('y', this.y)
-            .attr('width', this.width)
-            .attr('height', this.height);
+        this.box.attr('x', 0).attr('y', 0).attr('width', this.width).attr('height', this.height);
 
-        this.renderService.select<SVGRectElement>('.resize-topLeft').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select<SVGRectElement>('.resize-top').attr('x', this.x + (this.width / 2) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select<SVGRectElement>('.resize-topRight').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select<SVGRectElement>('.resize-right').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', this.y + (this.height / 2) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select<SVGRectElement>('.resize-bottomRight').attr('x', (this.x + this.width) - this.RESIZING_NODES_SIZE / 2).attr('y', (this.y + this.height) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select<SVGRectElement>('.resize-bottom').attr('x', this.x + (this.width / 2) - this.RESIZING_NODES_SIZE / 2).attr('y', (this.y + this.height) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select<SVGRectElement>('.resize-bottomLeft').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', (this.y + this.height) - this.RESIZING_NODES_SIZE / 2);
-        this.renderService.select<SVGRectElement>('.resize-left').attr('x', this.x - this.RESIZING_NODES_SIZE / 2).attr('y', this.y + (this.height / 2) - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-topLeft').attr('x', -this.RESIZING_NODES_SIZE / 2).attr('y',-this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-top').attr('x', this.width / 2 - this.RESIZING_NODES_SIZE / 2).attr('y', -this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-topRight').attr('x', this.width - this.RESIZING_NODES_SIZE / 2).attr('y', -this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-right').attr('x', this.width - this.RESIZING_NODES_SIZE / 2).attr('y', this.height / 2 - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-bottomRight').attr('x', this.width - this.RESIZING_NODES_SIZE / 2).attr('y', this.height - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-bottom').attr('x', this.width / 2 - this.RESIZING_NODES_SIZE / 2).attr('y', this.height - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-bottomLeft').attr('x', - this.RESIZING_NODES_SIZE / 2).attr('y', this.height - this.RESIZING_NODES_SIZE / 2);
+        this.renderService.select<SVGRectElement>('.resize-left').attr('x', -this.RESIZING_NODES_SIZE / 2).attr('y', this.height / 2 - this.RESIZING_NODES_SIZE / 2);
     }
 
     private isBoxVisible(visible: boolean): void {
