@@ -1,15 +1,14 @@
-import * as d3 from 'd3';
 import Context from '../../../app/Context';
 import { Event } from '../../../event/EventNames';
 import RenderService from '../../engines/d3/RenderService';
 import Entity from '../Entity';
 import PrimitiveElementPayload from '../interfaces/PrimitiveElementPayload';
-import EventPayload from '../../../event/types/EventPayload';
-
 export default class PointingNodes extends Entity {
+    public wasDrawn = false;
+
     private readonly POINTING_NODES_SIZE = 8;
 
-    public localGroup!: D3GElementSelection;
+    private localGroup!: D3GElementSelection;
     private pointingNodes!: { top: PrimitiveElementPayload, right: PrimitiveElementPayload, bottom: PrimitiveElementPayload, left: PrimitiveElementPayload };
 
     constructor(context: Context, id: string, x: number, y: number, width: number, height: number, renderService: RenderService) {
@@ -72,32 +71,9 @@ export default class PointingNodes extends Entity {
         };
     }
 
-    private flipPointingNodes(flip: boolean): void {
-        let offset = this.POINTING_NODES_SIZE;
-        const updatedTrianglePayloads = this.mountTrianglePayloads();
-
-        if (flip) {
-            updatedTrianglePayloads.top.y -= offset;
-            updatedTrianglePayloads.right.x += offset;
-            updatedTrianglePayloads.bottom.y += offset;
-            updatedTrianglePayloads.left.x -= offset;
-
-            this.renderService.rotatePathElement(updatedTrianglePayloads.top, 0).attr('fill', this.context.COLORS.blue);
-            this.renderService.rotatePathElement(updatedTrianglePayloads.right, 90).attr('fill', this.context.COLORS.blue);
-            this.renderService.rotatePathElement(updatedTrianglePayloads.bottom, 180).attr('fill', this.context.COLORS.blue);
-            this.renderService.rotatePathElement(updatedTrianglePayloads.left, 270,).attr('fill', this.context.COLORS.blue);
-
-            return;
-        }
-
-        this.renderService.rotatePathElement(updatedTrianglePayloads.top, 180).attr('fill', 'transparent');
-        this.renderService.rotatePathElement(updatedTrianglePayloads.right, 270).attr('fill', 'transparent');
-        this.renderService.rotatePathElement(updatedTrianglePayloads.bottom, 0).attr('fill', 'transparent');
-        this.renderService.rotatePathElement(updatedTrianglePayloads.left, 90).attr('fill', 'transparent');
-    }
-
     public draw(group?: D3GElementSelection): void {
         this.localGroup = group || this.localGroup;
+
 
         const trianglesPayload = this.mountTrianglePayloads();
 
@@ -140,23 +116,14 @@ export default class PointingNodes extends Entity {
             },
         };
 
-        this.setupDragHandler();
+        this.wasDrawn = true;
     }
 
-    private setupDragHandler() {
-        const resizingNodesDragHandler = d3.drag<SVGPathElement, unknown, void>()
-        
-            .on('start', (event: d3.D3DragEvent<SVGPathElement, unknown, void>) => {
-                this.emit(Event.entity.START_POINT, new EventPayload(event, this));
-            })
-            .on('drag', (event: d3.D3DragEvent<SVGPathElement, unknown, void>) => {
-                // TODO:
-            })
-            .on('end', (event: d3.D3DragEvent<SVGPathElement, unknown, void>) => {
-                this.emit(Event.entity.STOP_POINT, new EventPayload(event, this));
-            });
-
-        this.renderService.selectAll<SVGPathElement>(`#${this.id}`).call(resizingNodesDragHandler);
+    public appendTo(group: D3GElementSelection) {
+        Object.values(this.pointingNodes).forEach(node => {
+            node.element?.remove();
+            group.append(() => { return node.element!.node(); });
+        });
     }
 
     public transform(x: number, y: number, width: number, height: number): void {
@@ -165,28 +132,21 @@ export default class PointingNodes extends Entity {
         this.width = width;
         this.height = height;
 
-        let offset = this.POINTING_NODES_SIZE;
+        const offset = this.POINTING_NODES_SIZE;
         const updatedTrianglePayloads = this.mountTrianglePayloads();
 
-        if (this.isSelected) {
-            updatedTrianglePayloads.top.y -= offset;
-            updatedTrianglePayloads.right.x += offset;
-            updatedTrianglePayloads.bottom.y += offset;
-            updatedTrianglePayloads.left.x -= offset;
-        }
+        updatedTrianglePayloads.top.y -= offset;
+        updatedTrianglePayloads.right.x += offset;
+        updatedTrianglePayloads.bottom.y += offset;
+        updatedTrianglePayloads.left.x -= offset;
 
-        this.renderService.translateElement(updatedTrianglePayloads.top);
-        this.renderService.translateElement(updatedTrianglePayloads.right);
-        this.renderService.translateElement(updatedTrianglePayloads.bottom);
-        this.renderService.translateElement(updatedTrianglePayloads.left);
+        // Position to group boundaries and point to outside.
+        this.renderService.rotatePathElement(updatedTrianglePayloads.top, 0).attr('fill', this.context.COLORS.blue);
+        this.renderService.rotatePathElement(updatedTrianglePayloads.right, 90).attr('fill', this.context.COLORS.blue);
+        this.renderService.rotatePathElement(updatedTrianglePayloads.bottom, 180).attr('fill', this.context.COLORS.blue);
+        this.renderService.rotatePathElement(updatedTrianglePayloads.left, 270,).attr('fill', this.context.COLORS.blue);
     }
 
-    public setSelected(selected: boolean): void {
-        this.isSelected = selected;
-        this.flipPointingNodes(selected);
-
-        if (!selected) this.onLeavePointingMode();
-    }
-
+    public setSelected(): void { }
     public translate(): void { }
 }

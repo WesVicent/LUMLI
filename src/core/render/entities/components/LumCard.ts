@@ -7,7 +7,6 @@ import Context from "../../../app/Context";
 import LumText from "./LumText";
 // import LumArrow from "./LumArrow";
 import { Event } from "../../../event/EventNames";
-import PointingNodes from "../GUI/PointingNodes";
 
 export default class LumCard extends Entity {
     public localGroup!: D3GElementSelection;
@@ -15,7 +14,6 @@ export default class LumCard extends Entity {
     private rect!: D3RectElementSelection;
     private line!: D3LineElementSelection;
     private text: LumText;
-    private pointingNodes: PointingNodes;
     // private arrow!: LumArrow;
 
     private dragStartPos!: { x: number, y: number };
@@ -39,7 +37,6 @@ export default class LumCard extends Entity {
         this.height = height;
 
         this.text = new LumText(this.context, this.x, this.y, this.width, this.height, 18, text, this.renderService);
-        this.pointingNodes = new PointingNodes(this.context, this.id, this.x, this.y, this.width, this.height, this.renderService);
 
         // this.arrow = new LumArrow(this.context, 'asasasas', 100, 100, 200, 200, this.renderService);
     }
@@ -52,8 +49,6 @@ export default class LumCard extends Entity {
         this.line = this.renderService.drawPrimitiveLine(0, this.height / 5, this.width, this.height / 5, this.localGroup);
 
         this.text.draw(this.localGroup);
-
-        this.pointingNodes.draw(this.localGroup);
 
         // this.arrow.draw();
 
@@ -89,7 +84,6 @@ export default class LumCard extends Entity {
             .attr('y2', this.height - (this.height - 20));
 
         this.text.transform(x, y, width, height);
-        this.pointingNodes.transform(x, y, width, height);
     }
 
     public getPositionAndSize(): EntityBase {
@@ -156,7 +150,6 @@ export default class LumCard extends Entity {
 
     public setSelected(selected: boolean): void {
         this.highlightBorders(selected);
-        this.pointingNodes.setSelected(selected);
     }
 
     public translate(x: number, y: number): void {

@@ -6,9 +6,12 @@ import EntityBase from '../types/EntityBase';
 import { Event } from '../../../event/EventNames';
 import EventPayload from '../../../event/types/EventPayload';
 import Context from '../../../app/Context';
+import PointingNodes from './PointingNodes';
+import LumCard from '../components/LumCard';
 
 export default class BoundaryBox extends Entity {
     private nodes: Array<IdAndPositions>;
+    private pointingNodes: PointingNodes;
 
     private dragStartPos!: { x: number, y: number };
     private isDragging = false;
@@ -34,14 +37,15 @@ export default class BoundaryBox extends Entity {
 
         this.nodes = this.createNodePositionsArray(x, y, width, height);
 
-        
-        this.context.__eventBus.listen(Event.selection.SELECT, this.handleSelectionChange.bind(this));
-        this.context.__eventBus.listen(Event.selection.UNSELECT, this.handleSelectionChange.bind(this));
-        this.context.__eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
-        this.context.__eventBus.listen(Event.entity.STOP_MOVEMENT, this.handleStopMoving.bind(this));
+        context.__eventBus.listen(Event.selection.SELECT, this.handleSelectionChange.bind(this));
+        context.__eventBus.listen(Event.selection.UNSELECT, this.handleSelectionChange.bind(this));
+        context.__eventBus.listen(Event.entity.MOVING, this.handleMoving.bind(this));
+        context.__eventBus.listen(Event.entity.STOP_MOVEMENT, this.handleStopMoving.bind(this));
 
         context.__eventBus.listen(Event.global.ENTER_POINTING_MODE, this.onEnterPointingMode.bind(this));
         context.__eventBus.listen(Event.global.LEAVE_POINTING_MODE, this.onLeavePointingMode.bind(this));
+
+        this.pointingNodes = new PointingNodes(this.context, this.id, this.x, this.y, this.width, this.height, this.renderService);
     }
 
     private onEnterPointingMode() {
@@ -52,24 +56,39 @@ export default class BoundaryBox extends Entity {
         this.isNodesVisible(true);
     }
 
-    public setSelected(selected: boolean): void {
-        this.isSelected = selected;
-    }
+    public setSelected(): void { }
 
     public transform(x: number, y: number, width: number, height: number): void {
         this.width = width;
         this.height = height;
+        
         this.translate(x, y);
+        this.pointingNodes.transform(x, y, width, height);
     }
 
     private handleSelectionChange(payload: EventPayload): void {
         const target = payload.target as EntityBase;
+
+        this.darwAndAppendPointingNodes(target);
 
         if (target) {
             this.transform(target.x, target.y, target.width, target.height);
             this.isNodesVisible(true);
         } else { // Unselect all was triggered.
             this.isNodesVisible(false);
+        }
+    }
+
+    private darwAndAppendPointingNodes(target: EntityBase) {
+        if (target instanceof LumCard) {
+            const group = target.localGroup;
+
+            if (this.pointingNodes.wasDrawn) {
+                this.pointingNodes.appendTo(group);
+            } else {
+                this.pointingNodes.draw(group);
+                this.pointingNodes.transform(target.x, target.y, target.width, target.height);
+            }
         }
     }
 
