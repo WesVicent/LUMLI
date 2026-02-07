@@ -3,6 +3,7 @@ import Context from "../../../app/Context";
 import RenderService from "../../engines/d3/RenderService";
 import Entity from "../Entity";
 import EventPayload from "../../../event/types/EventPayload";
+import { Event } from "../../../event/EventNames";
 
 export default class LumArrow extends Entity {
     public localGroup!: D3GElementSelection;
@@ -29,6 +30,18 @@ export default class LumArrow extends Entity {
 
         this.endX = endX - x;
         this.endY = endY - y;
+
+        context.__eventBus.listen(Event.global.ENTER_POINTING_MODE, this.onEnterPointingMode.bind(this));
+        context.__eventBus.listen(Event.global.LEAVE_POINTING_MODE, this.onLeavePointingMode.bind(this));
+    }
+
+    private onEnterPointingMode(payload: EventPayload) {
+        const target = this.context.__appState.selectedEntities[0];
+        this.renderService.drawPrimitiveLine(target.x, target.y, this.endX, this.endY, this.localGroup);
+    }
+
+    private onLeavePointingMode(payload: EventPayload) {
+
     }
 
     public draw(): void {
@@ -92,7 +105,7 @@ export default class LumArrow extends Entity {
             .style("fill", color);
     }
 
-    protected setSelected(selected: boolean): void {
+    public setSelected(selected: boolean): void {
         this.highlight(selected);
     }
 

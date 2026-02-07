@@ -5,7 +5,7 @@ import Entity from "../Entity";
 import EventPayload from "../../../event/types/EventPayload";
 import Context from "../../../app/Context";
 import LumText from "./LumText";
-// import LumArrow from "./LumArrow";
+import LumArrow from "./LumArrow";
 import { Event } from "../../../event/EventNames";
 
 export default class LumCard extends Entity {
@@ -14,7 +14,7 @@ export default class LumCard extends Entity {
     private rect!: D3RectElementSelection;
     private line!: D3LineElementSelection;
     private text: LumText;
-    // private arrow!: LumArrow;
+    private arrow!: LumArrow;
 
     private dragStartPos!: { x: number, y: number };
     private isDragging = false;
@@ -38,7 +38,7 @@ export default class LumCard extends Entity {
 
         this.text = new LumText(this.context, this.x, this.y, this.width, this.height, 18, text, this.renderService);
 
-        // this.arrow = new LumArrow(this.context, 'asasasas', 100, 100, 200, 200, this.renderService);
+        this.arrow = new LumArrow(this.context, 'asasasas', 100, 100, 200, 200, this.renderService);
     }
 
     public draw(): void {
@@ -50,7 +50,7 @@ export default class LumCard extends Entity {
 
         this.text.draw(this.localGroup);
 
-        // this.arrow.draw();
+        this.arrow.draw();
 
         // GRID ref
         // this.renderService.drawPrimitiveLine(0, this.height / 2, this.width, this.height / 2, this.localGroup).style('stroke', '#7b00ff');
